@@ -17,7 +17,7 @@ This is the complete user manual. See the link below for the quick start guide.
 Compatible with Windows 7, 8, 10, and 11.
 
 Les Ferch, lesferch@gmail.com\
-GitHub repository created 2021-03-26, last updated 2022-02-26
+GitHub repository created 2021-03-26, last updated 2022-04-07
 
 # Summary
 
@@ -220,7 +220,7 @@ This folder type controls the view you see for the *Searches* item within your u
 
 ## Options Menu
 
-![image](https://user-images.githubusercontent.com/79026235/152627497-79f752e9-181f-4678-98a2-dff10753ba5a.png)
+![image](https://user-images.githubusercontent.com/79026235/162346394-4f29f16b-77db-42ab-b790-f52ad57e6019.png)
 
 **Show File Extensions**
 
@@ -298,6 +298,11 @@ This option retains any folder views that have been saved using Explorer's **App
 If you really want to use this option, be sure to use the **Apply to Folders** button in Explorer for each folder type view you want to set. That is, in *Explorer*, set your desired view for **Downloads**, then go to **View**, **Options**, **Change folder and search options**, **View** tab, and click **Apply to Folders**. Repeat those steps for **Documents**, **Music**, **Pictures**, and **Videos**. All of those views will then take precedence over any Global view set with *WinSetView*.
 
 Note: If **Make All Folders Generic** is also checked, only **Downloads**, **Libraries**, and **Search Results** will get their views from any view saved via Explorer's **Apply to Folders** button. Of course, if you later change a folder to type **Documents**, **Music**, **Pictures**, or **Videos**, it will then pick up the view settings that were saved using **Apply to Folders**.
+
+\
+**Disable folder thumbnails** (Advanced interface)
+
+This option sets a registry value that tells Explorer to NOT create a thumbnail icon for *folders*. It has no effect on thumbnails for *files*.
 
 ## Columns
 
@@ -610,7 +615,7 @@ Here's an overview of the steps the PowerShell script performs to set Explorer v
 
 # Language Support
 
-WinSetView is designed to work with any left to right language. There are currently 31 languages included with WinSetView. If your language is not included, please contact me.
+WinSetView is designed to work with any left to right language. There are currently 33 languages included with WinSetView. If your language is not included, please contact me.
 
 I have not included any right to left languages, such as Arabic, with WinSetView, as I'm not sure if that would be useful. However, if a native speaker tells me it would still be helpful to have their right to left language included, I will certainly add the language.
 
@@ -636,7 +641,7 @@ The *Tools* section provides details about which scripts and procedures create t
 
 ## Language Contributions 
 
-Wherever possible, translated text is pulled directly from Windows (e.g. column headings). Some languages have had the benefit of human translation, but any have been done using online translation software and could use improvement from a native speaker. If you can help with a translation, please contact me!
+Wherever possible, translated text is pulled directly from Windows (e.g. column headings). Some languages have had the benefit of human translation, but many have been done using online translation software and could use improvement from a native speaker. If you can help with a translation, please contact me!
 
 Please see the Acknowledgment section for any language files that have been hand-corrected.
 
