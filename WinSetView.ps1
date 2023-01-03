@@ -46,7 +46,7 @@ If ($MajVer -ge 10) {$WinVer = '10'}
 
 If (($WinVer -ne '7') -And ($WinVer -ne '8') -And ($WinVer -ne '10')){
   Write-Host `n'Windows 7, 8, 10 or higher is required.'`n
-  Read-Host -Prompt 'Press any key to continue'
+  Read-Host -Prompt 'Press Enter to continue'
   Exit
 }
 
@@ -54,7 +54,7 @@ If (($WinVer -ne '7') -And ($WinVer -ne '8') -And ($WinVer -ne '10')){
 
 If ($PSVersionTable.PSVersion.Major -lt 2) {
   Write-Host `n'Powershell 2 or higher is required.'`n
-  Read-Host -Prompt 'Press any key to continue'
+  Read-Host -Prompt 'Press Enter to continue'
   Exit
 }
 
@@ -65,22 +65,34 @@ If ($File.Length -gt 4) {$FileExt = $File.SubString($File.Length-4)}
 
 If (-Not(($FileExt -eq '.ini') -Or ($FileExt -eq '.reg'))) {
   Write-Host `n'No INI or REG file supplied on command line.'`n
-  Read-Host -Prompt 'Press any key to continue'
+  Read-Host -Prompt 'Press Enter to continue'
   Exit
 }
 
+# Create PSScriptRoot variable if not exist (i.e. PowerShell 2)
+
+If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $Script:MyInvocation.MyCommand.Path -Parent}
+
+# Make sure we can access the INI (or REG) file
+
+set-location $PSScriptRoot
+
 If (-Not(Test-Path -Path $File)) {
   Write-Host `n"File not found: $File"`n
-  Read-Host -Prompt 'Press any key to continue'
+  Read-Host -Prompt 'Press Enter to continue'
   Exit
 }
 
 $BagM = '"HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\BagMRU"'
 $Bags = '"HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags"'
+$Shel = '"HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell"'
+$ShPS = 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell'
+$Strm = '"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams"'
 $Defs = '"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Defaults"'
 $CUFT = '"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FolderTypes"'
 $LMFT = '"HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FolderTypes"'
 $Advn = '"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"'
+
 $ImpR = '[HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\'
 
 $TempDir  = "$env:TEMP"
@@ -91,11 +103,8 @@ $T1       = "$TempDir\WinSetView1.tmp"
 $T2       = "$TempDir\WinSetView2.tmp"
 $T3       = "$TempDir\WinSetView3.tmp"
 $T4       = "$TempDir\WinSetView4.tmp"
+$ShellBak = "$TempDir\ShellBak.reg"
 $TimeStr  = (get-date).ToString('yyyy-MM-dd-HHmm-ss')
-
-# Create PSScriptRoot variable if not exist (i.e. PowerShell 2)
-
-If (!$PSScriptRoot) {$PSScriptRoot = Split-Path $Script:MyInvocation.MyCommand.Path -Parent}
 
 # Use script folder if we have write access. Otherwise use AppData folder.
 
@@ -110,6 +119,7 @@ $BakFile  = "$AppData\Backup\$TimeStr.reg"
 $Custom   = "$AppData\WinSetViewCustom.reg"
 
 Function RestartExplorer {
+  Reg Import $ShellBak
   Get-process explorer | Stop-Process
   Explorer $PSScriptRoot
   Exit
@@ -135,9 +145,6 @@ Else {
   $ResetThumbs = [Int]$iniContent['Options']['ResetThumbs']
   $SearchOnly = [Int]$iniContent['Options']['SearchOnly']
   $SetVirtualFolders = [Int]$iniContent['Options']['SetVirtualFolders']
-  $FileDialogOption = [Int]$iniContent['Options']['FileDialogOption']
-  $FileDialogView = [Int]$iniContent['Options']['FileDialogView']
-  $FileDialogNG = [Int]$iniContent['Options']['FileDialogNG']
   $ThisPCoption = [Int]$iniContent['Options']['ThisPCoption']
   $ThisPCView = [Int]$iniContent['Options']['ThisPCView']
   $ThisPCNG = [Int]$iniContent['Options']['ThisPCNG']
@@ -164,7 +171,7 @@ Remove-Item $T4 2>$Null
 
 Reg Export $BagM $T1 /y 2>$Null
 Reg Export $Bags $T2 /y 2>$Null
-Reg Export $Defs $T3 /y 2>$Null
+Reg Export $Strm $T3 /y 2>$Null
 Reg Export $CUFT $T4 /y 2>$Null
 
 Cmd /c Copy $T1+$T2+$T3+$T4 $BakFile >$Null 2>$Null
@@ -173,6 +180,12 @@ Remove-Item $T1 2>$Null
 Remove-Item $T2 2>$Null
 Remove-Item $T3 2>$Null
 Remove-Item $T4 2>$Null
+
+Remove-Item $ShellBak 2>$Null
+Remove-Item -Path "$ShPS\*" -Recurse 2>$Null
+Remove-ItemProperty -Path "$ShPS" -Name  Logo 2>$Null
+Remove-ItemProperty -Path "$ShPS" -Name  FolderType 2>$Null
+Reg Export $Shel $ShellBak /y 2>$Null
 
 # Clear current Explorer view registry values
 
@@ -198,24 +211,28 @@ Reg Add $Advn /v UseCompactMode /t REG_DWORD /d ($CompView) /f
 
 # If reset, restart Explorer and exit
 
-If ($Reset -eq 1) {RestartExplorer}
+If ($Reset -eq 1) {
+  Reg Delete $Strm /f 2>$Null
+  RestartExplorer
+}
 
-# Function to help Set up views for This PC and Network virtual folders
+# Function to help Set up views for This PC
 
 Function SetBagValues ($Key) {
   Reg Add $Key /v LogicalViewMode /d $LVMode /t REG_DWORD /f >$Null
   Reg Add $Key /v Mode /d $Mode /t REG_DWORD /f >$Null
-  If ($ThisPCNG -eq 1) {Reg Add $Key /v GroupView /d 0 /t REG_DWORD /f >$Null}
+  $Group = 1-$ThisPCNG
+  Reg Add $Key /v GroupView /d $Group /t REG_DWORD /f >$Null
   If ($LVMode -eq 3) {Reg Add $Key /v IconSize /d $IconSize /t REG_DWORD /f >$Null}
 }
 
 # Set view values based on selection index
 
 Function SetViewValues($Index) {
-  If ($Index -eq 1) {$Script:LVMode = 1; $Script:Mode = 4}
-  If ($Index -eq 2) {$Script:LVMode = 4; $Script:Mode = 3}
-  If ($Index -eq 3) {$Script:LVMode = 2; $Script:Mode = 6}
-  If ($Index -eq 4) {$Script:LVMode = 5; $Script:Mode = 8}
+  If ($Index -eq 1) {$Script:LVMode = 1; $Script:Mode = 4; $Script:IconSize = 16}
+  If ($Index -eq 2) {$Script:LVMode = 4; $Script:Mode = 3; $Script:IconSize = 16}
+  If ($Index -eq 3) {$Script:LVMode = 2; $Script:Mode = 6; $Script:IconSize = 48}
+  If ($Index -eq 4) {$Script:LVMode = 5; $Script:Mode = 8; $Script:IconSize = 32}
   If ($Index -eq 5) {$Script:LVMode = 3; $Script:Mode = 1; $Script:IconSize = 16}
   If ($Index -eq 6) {$Script:LVMode = 3; $Script:Mode = 1; $Script:IconSize = 48}
   If ($Index -eq 7) {$Script:LVMode = 3; $Script:Mode = 1; $Script:IconSize = 96}
@@ -227,7 +244,9 @@ Function BuildRegData($Key) {
   $Script:RegData += '@="' + $Script:FT + '"' + "`r`n"
   $Script:RegData += '"LogicalViewMode"=dword:' + $Script:LVMode + "`r`n"
   $Script:RegData += '"Mode"=dword:' + $Script:Mode + "`r`n"
-  If ($Script:LVMode -eq 3) {$Script:RegData += '"IconSize"=dword:' + '{0:x}' -f $Script:IconSize + "`r`n"} 
+  If ($Script:LVMode -eq 3) {$Script:RegData += '"IconSize"=dword:' + '{0:x}' -f $Script:IconSize + "`r`n"}
+  $Group = 1-$FileDialogNG
+  $Script:RegData += '"GroupView"=dword:' + $Group + "`r`n"
 }
 
 # The FolderTypes key does not include entries for This PC and Network
@@ -245,20 +264,17 @@ If ($ThisPCoption -ne 0) {
   SetBagValues("$Bags\1\Shell\$GUID")
 }
 
-# Network has a unique GUID, so we'll set it's view via an AllFolders entry:
+# Have to use a reg file to set the Network view:
 
 If ($NetworkOption -ne 0) {
-  $GUID = '{25CC242B-9A7C-4F51-80E0-7A2928FEBE42}'
-  SetViewValues($NetworkView)
-  Reg Add "$Bags\AllFolders\Shell\$GUID" /v Mode /d "$Mode" /t REG_DWORD /f
-  Reg Add "$Bags\AllFolders\Shell\$GUID" /v LogicalViewMode /d "$LVMode" /t REG_DWORD /f
-  If ($LVMode -eq 3) {Reg Add "$Bags\AllFolders\Shell\$GUID" /v IconSize /d "$IconSize" /t REG_DWORD /f}
-  If ($NetworkNG -eq 1) {Reg Add "$Bags\AllFolders\Shell\$GUID" /v GroupView /d 0 /t REG_DWORD /f}
+  $Group = 1-$NetworkNG
+  $RegFile = ".\AppParts\NetworkView\$NetworkView-$Group.reg"
+  If (Test-Path -Path $RegFile) {Reg Import $RegFile}
 }
 
-If ($Generic -eq 1) {Reg Add "$Bags\AllFolders\Shell" /v FolderType /d Generic /t REG_SZ /f}
-If ($NoFolderThumbs -eq 1) {Reg Add "$Bags\AllFolders\Shell" /v Logo /d none /t REG_SZ /f}
-If ($ResetThumbs -eq 1) {Remove-Item -ErrorAction Ignore "$Env:LocalAppData\Microsoft\Windows\Explorer\thumbcache*.db"}
+If ($Generic -eq 1) {Reg Add "$Shel" /v FolderType /d Generic /t REG_SZ /f}
+If ($NoFolderThumbs -eq 1) {Reg Add "$Shel" /v Logo /d none /t REG_SZ /f}
+If ($ResetThumbs -eq 1) {Remove-Item -ErrorAction SilentlyContinue "$Env:LocalAppData\Microsoft\Windows\Explorer\thumbcache*.db"}
 
 If ($SetVirtualFolders -eq 1) {
   $GUID = $iniContent['Generic']['GUID']
@@ -297,7 +313,7 @@ $PathItems = @{
   'ItemFolderNameDisplay' = ''
 }
 
-If ($FileDialogOption -eq 1) {$RegData = "Windows Registry Editor Version 5.00`r`n`r`n"}
+$RegData = "Windows Registry Editor Version 5.00`r`n`r`n"
 
 Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
 
@@ -306,6 +322,11 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
     $Include = [Int]$iniContent[$FT]['Include']
     
     If ($Include -eq 1) {
+
+      $FileDialogOption = [Int]$iniContent[$FT]['FileDialogOption']
+      $FileDialogView = [Int]$iniContent[$FT]['FileDialogView']
+      $FileDialogNG = [Int]$iniContent[$FT]['FileDialogNG']
+
       If (($FileDialogOption -eq 1) -And ($FT -ne 'Global')) {
         $GUID = $iniContent[$FT]['GUID']
         SetViewValues($FileDialogView)
@@ -314,10 +335,13 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
       }
       $GroupBy = $iniContent[$FT]['GroupBy']
       If ($GroupBy -ne '') {$GroupBy = "System.$GroupBy"}
+      $GroupByOrder = $iniContent[$FT]['GroupByOrder']
+      If ($GroupByOrder -eq '+') {$GroupByOrder = 1} Else {$GroupByOrder = 0}
       $SortBy = 'prop:' + $iniContent[$FT]['SortBy']
       $SortBy = $SortBy -Replace '\+','+System.'
       $SortBy = $SortBy -Replace '-','-System.'
       $View = $iniContent[$FT]['View']
+
       $CustomIconSize = $iniContent[$FT]['IconSize']
       SetViewValues($View)
       If ($CustomIconSize -ne '') {$IconSize = $CustomIconSize}
@@ -343,8 +367,9 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
           $GUID = $_.PSChildName
           $ChildKey = $Key + '\' + $GUID
           Set-ItemProperty -Path $ChildKey -Name 'LogicalViewMode' -Value $LVMode
-          If ($LVMode -eq 3)  {Set-ItemProperty -Path $ChildKey -Name 'IconSize' -Value $IconSize}
+          Set-ItemProperty -Path $ChildKey -Name 'IconSize' -Value $IconSize
           Set-ItemProperty -Path $ChildKey -Name 'GroupBy' -Value $GroupBy
+          Set-ItemProperty -Path $ChildKey -Name 'GroupAscending' -Value $GroupByOrder
           Set-ItemProperty -Path $ChildKey -Name 'SortByList' -Value $SortBy
           Set-ItemProperty -Path $ChildKey -Name 'ColumnList' -Value $ColumnList
         }
@@ -353,7 +378,7 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
   }
 }
 
-# Export results for use with comparison tools such as WinDiff
+# Export results for use with comparison tools such as WinMerge
 
 Reg Export $CUFT $RegFile2 /y
 
