@@ -7,41 +7,44 @@ SetLocale(1033)
 Dim RetVal, ReturnArray
 Dim WidthIcon, PixInputIcon, NameWarnIcon, optIcon, DetailsIcon, RightClickIcon
 Dim Item2Move: Item2Move = ""
-document.title = ""
-On Error Resume Next
-window.returnValue = ""
-Args = Split(window.dialogArguments,";")
-document.title = Args(0)
-On Error Goto 0
+Dim param
+Set param = window.external.Argument
 
-If document.title="" Then
-  window.moveTo 999999999,999999999
-  MsgBox "This script is called by WinSetView.hta"
-  self.close
-End If
+aArgs = Split(param.param1,";")
+param.param1 = ""
+document.title = aArgs(0)
 
-Font = Args(1)
-FontSize = Args(2)
-Scale = CDbl(Args(3))
-Theme = Args(4) '0:Light 1:Dark 2:High Contrast
+Font = aArgs(1)
+FontSize = aArgs(2)
+Scale = CDbl(aArgs(3))
+Theme = aArgs(4) '0:Light 1:Dark 2:High Contrast
 
 Set oWSH = CreateObject("Wscript.Shell")
 CurBld = oWSH.RegRead("HKLM\Software\Microsoft\Windows NT\CurrentVersion\CurrentBuild")
 
+BaseScale = 1.0
+On Error Resume Next
+BaseScale = oWSH.RegRead("HKCU\Control Panel\Desktop\WindowMetrics\AppliedDPI") / 96
+On Error Goto 0
+
+WidthIcon = "⟷"
+PixInputIcon = "⟷."
+NameWarnIcon = "⚠"
+optIcon = "⚙"
+DetailsIcon = "⋮⋮⋮"
+RightClickIcon = "⋮"
+
+If CurBld<10000 Then
+  WidthIcon = "←→"
+  PixInputIcon = "←→."
+  NameWarnIcon = "!"
+  OptIcon = "☼"
+  DetailsIcon = "⋮⋮"
+End If
+
 Sub window_onLoad
-  WidthIcon = "⟷"
-  PixInputIcon = "⟷."
-  NameWarnIcon = "⚠"
-  optIcon = "⚙"
-  DetailsIcon = "⋮⋮⋮"
-  RightClickIcon = "⋮"
-  If CurBld<10000 Then
-    WidthIcon = "←→"
-    PixInputIcon = "←→."
-    NameWarnIcon = "!"
-    OptIcon = "☼"
-    DetailsIcon = "⋮⋮"
-  End If
+
+  If document.title="GetPadValues" Then Exit Sub
 
   Document.Body.Style.FontFamily = Font
   Document.Body.Style.FontSize = FontSize & "pt"
@@ -92,26 +95,26 @@ Sub window_onLoad
   Select Case document.title
     Case DetailsIcon
       DetailsDiv.Style.Display = "inline"
-      DetailsMsg.innerHTML = Args(5)
+      DetailsMsg.innerHTML = aArgs(8)
     Case RightClickIcon
       RightClickDiv.Style.Display = "inline"
-      RightClickMsg.innerHTML = Args(5)
+      RightClickMsg.innerHTML = aArgs(8)
     Case WidthIcon
       WidthDiv.Style.Display = "inline"
-      WidthMsg.innerHTML = Args(5)
+      WidthMsg.innerHTML = aArgs(8)
     Case NameWarnIcon
       NameWarnDiv.Style.Display = "inline"
-      NameWarnMsg.innerHTML = Args(5)
+      NameWarnMsg.innerHTML = aArgs(8)
     Case PixInputIcon
       PixDiv.Style.Display = "inline"
-      PixMsg.innerHTML = Args(5)
-      InputPix.Value = Args(6)
+      PixMsg.innerHTML = aArgs(8)
+      InputPix.Value = aArgs(9)
       InputPix.Select
     Case OptIcon
       DialogViewDiv.Style.Display = "inline"
-      fl1.innerHTML = Args(5)
-      fl2.innerHTML = Args(6)
-      ArrView = Split(Args(7),"|")
+      fl1.innerHTML = aArgs(8)
+      fl2.innerHTML = aArgs(9)
+      ArrView = Split(aArgs(10),"|")
       For i = 0 To 8
         Set oOption = Document.createElement("Option")
         oOption.Text =  ArrView(i) 
@@ -121,7 +124,7 @@ Sub window_onLoad
       Next
     Case Else
       ArrangeDiv.Style.Display = "inline"
-      InputArray = Split(Args(5),"|")
+      InputArray = Split(aArgs(8),"|")
       ReDim ReturnArray(UBound(InputArray))
       For i = 0 To UBound(InputArray)
         html = html & "<div id=" & i & " class=" & MvClass & " unselectable=on onmousedown=DragMoveStart(" & i & ") onmouseover=DragMoveSwap(" & i & ")>" & InputArray(i) & "</div>" & VBCRLF
@@ -129,14 +132,18 @@ Sub window_onLoad
       Next
       list.innerHTML = html
   End Select
-  window.dialogHeight = document.body.scrollHeight + 8 & "px"
+
+  y = document.body.scrollHeight
+  window.moveTo aArgs(6), aArgs(7)
+  window.resizeTo aArgs(5),y + (56 * BaseScale)
+  
   If document.title=OptIcon Then
     fc1.Checked = False
     fc2.Checked = True
-    If Args(8)="1" Then fc1.Checked = True
-    If Args(9)="0" Then fc2.Checked = False
-    If Args(10)="" Then Args(10)="1"
-    fs1.SelectedIndex = Int(Args(10))
+    If aArgs(11)="1" Then fc1.Checked = True
+    If aArgs(12)="0" Then fc2.Checked = False
+    If aArgs(13)="" Then aArgs(13)="1"
+    fs1.SelectedIndex = Int(aArgs(13))
     fc1Clicked
   End If
 End Sub
@@ -150,33 +157,33 @@ Sub fc1Clicked
 End Sub
 
 Sub DoneFD
-  window.returnValue = Abs(Int(fc1.Checked)) & "|" & fs1.SelectedIndex & "|" & Abs(Int(fc2.Checked))
-  self.close
+  param.param1 = Abs(Int(fc1.Checked)) & "|" & fs1.SelectedIndex & "|" & Abs(Int(fc2.Checked))
+  window.external.close
 End Sub
 
 Sub DoneArrange
-  window.returnValue = Join(ReturnArray,"|")
-  self.close
+  param.param1 = Join(ReturnArray,"|")
+  window.external.close
 End Sub
 
 Sub DoneDetails
-  window.returnValue = "1"
-  self.close
+  param.param1 = "1"
+  window.external.close
 End Sub
 
 Sub DoneRightClick
-  window.returnValue = "1"
-  self.close
+  param.param1 = "1"
+  window.external.close
 End Sub
 
 Sub DoneWidth
-  window.returnValue = "1"
-  self.close
+  param.param1 = "1"
+  window.external.close
 End Sub
 
 Sub DonePix
-  window.returnValue = InputPix.Value
-  self.close
+  param.param1 = InputPix.Value
+  window.external.close
 End Sub
 
 Sub document_onmouseup
@@ -193,7 +200,7 @@ Sub document_onkeydown
       Case WidthIcon
         DoneWidth
       Case NameWarnIcon
-        self.close
+        window.external.close
       Case PixInputIcon
         DonePix
       Case OptIcon

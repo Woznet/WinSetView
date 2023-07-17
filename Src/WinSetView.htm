@@ -1,58 +1,39 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!--
 WinSetView (Globally Set Explorer Folder Views)
 Les Ferch, lesferch@gmail.com, GitHub repository created 2021-03-26
-WinSetView.hta (GUI tool to select desired views)
+WinSetView.htm (GUI tool to select desired views)
 -->
 <html>
 <head>
+<title>WinSetView</title>
 <meta charset="UTF-8" http-equiv="X-UA-Compatible" content="IE=8">
+<htmlApplication
+  width=9999
+  height=9999
+>
 <hta:application
-  id=oHTA
-  icon=powershell.exe
   applicationname=WinSetView
-  selection=yes
-  singleinstance=yes
   contextmenu=no
 >
 <script language="VBScript">
 Option Explicit
 
-Const Version = "2.53"
-
-Set oWSH = CreateObject("Wscript.Shell")
-
-Dim WinSizePos, aWinSizePos, GotError
-WinSizePos = ""
-On Error Resume Next
-WinSizePos = oWSH.RegRead("HKCU\Software\WinSetView\WinSizePos")
-On Error Goto 0
-
-If WinSizePos<>"" Then
-  aWinSizePos = Split(WinSizePos,",")
-  On Error Resume Next
-  Window.ResizeTo aWinSizePos(0),aWinSizePos(1)
-  Window.MoveTo aWinSizePos(2),aWinSizePos(3)
-  GotError = Err.Number<>0
-  On Error Goto 0
-End If
-
-If WinSizePos="" Or GotError Then
-  RequiredWidth = 700
-  If RequiredWidth>screen.availWidth Then RequiredWidth = screen.availWidth
-  Window.ResizeTo RequiredWidth, screen.availHeight
-  Window.MoveTo (screen.availWidth - RequiredWidth) / 2, 4
-End If
+Const Version = "2.76"
 
 SetLocale(1033)
 Const ForReading = 1
 Const ForWriting = 2
 Const Unicode = -1
 Const Ansi = 0
-Const HKCU = &H80000001
 
-Dim o, oWSH, oFSO, oFolder, oFile, oFiles, oOption, oReg, oElement, oElements
-Dim oFolderTypes, oWMI, oSettings, oSearchOnly, oOption1, oOption2, oThemes
+' Class for passing parameters
+Class ClassParam
+  Dim param1
+End Class
+
+Dim o, oWSH, oFSO, oApp, oFolder, oFile, oFiles, oOption, oElement, oElements
+Dim oFolderTypes, oSettings, oSearchOnly, oOption1, oOption2, oThemes
 Dim i, j, Q, V, X, Y, Z, Temp, TestFile, Section, CheckCount, Value, Key, ArrKeys, Result, SubKey
 Dim AvailHeight, HeadHeight, RequiredWidth, CurrentWidth, Maximized, Fonts, TestFileName
 Dim AppData, NTVer, WinVer, MajVer, Folder, INIFile, rbShow, BodyHTML, TaggedHTML, Tag, Item
@@ -60,7 +41,7 @@ Dim Language,LangDir, LangFile, LangCount, LangData, LangIndex, UBFolderType, YS
 Dim ViewFile, ViewData, FolderTypeFile, Scale, FontsFile, Backup, F1, F2, FTHide, KeepAdvanced
 Dim ColFile, ColData, SelectedFont1, SelectedFont2, FontFile, LRArrow, ResetThumbs
 Dim CmdLine, Line, Order, sOrder, SelectedSize1, SelectedSize2, GUID, Found, VirtualStore
-Dim C1, C2, LastColSel, FTindex, Data, Show, TempFile, File, PartsDir, FileDialogExe
+Dim C1, C2, LastColSel, FTindex, Data, Show, TempFile, File, PartsDir, ToolsDir
 Dim ColWid, ColShow, SortBy, BaseScale, UpArrow, DnArrow, MyPath, MyFolder, a, b, c
 Dim Gidx, Midx, Nidx, Pidx, Widx, S1idx, S2idx, S3idx, S4idx, Sort1, Sort2, Sort3, Sort4
 Dim ArrSort1, ArrSort2, ArrSort3, ArrSort4, ArrFonts
@@ -69,11 +50,12 @@ Dim ArrFD, ArrFDV, ArrFDG, LParen, RParen, DetailsIcon, RightClickIcon
 Dim ArrLang, ArrView, ArrColData, ArrColDataItem, ArrColumnEntry, ArrColumnList, ArrLine
 Dim ArrData(21), ArrFolderTypeGUID(60), ArrFolderType(60), ArrFolderTypeLang(60), ArrInherit(60)
 Dim ArrColumnLists, ArrGroupBy, ArrInheritFlag, ArrHTML1, ArrHTML2, ArrViewChoice
-Dim ArrSortBy, ArrIncludeFlag, ArrIconSize, ModalHTA, ArrThemes
+Dim ArrSortBy, ArrIncludeFlag, ArrIconSize, ArrThemes
 Dim ColShowLabels, FTCopyIdx, ThemeFile, SectionList, sTheme, CurBld, LWinVer
 Dim TempArray, RetVal, DialogArgs, DialogOptions, id, GrpUpArrow, GrpDnArrow
-Dim CopyIcon, PasteIcon, InsIcon, Warning, OptIcon, DialogTop, HighContrast, Beta
-Dim Txt1Data, Txt2Data
+Dim Warning, OptIcon, DialogTop, HighContrast, Beta
+Dim Txt1Data, Txt2Data, WinSys, ExeErr, ArrExe
+Dim WinSizePos, aWinSizePos, GotError, TaskbarTop, MSHTMLVer
 
 Z = vbCRLF
 Q = Chr(34)
@@ -82,8 +64,45 @@ KeepAdvanced = False
 Beta = Instr(LCase(Version),"beta")>0
 
 Set oFSO = CreateObject("Scripting.FileSystemObject")
-Set oReg = GetObject("winmgmts:\\.\root\default:StdRegProv")
-Set oWMI = GetObject("winmgmts:\\.\root\cimv2")
+Set oWSH = CreateObject("Wscript.Shell")
+Set oApp = CreateObject("Shell.Application")
+
+WinSizePos = ""
+TaskbarTop = False
+On Error Resume Next
+WinSizePos = oWSH.RegRead("HKCU\Software\WinSetView\WinSizePos")
+TaskbarTop = oWSH.RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects2\Settings")(12) = 1
+TaskbarTop = oWSH.RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3\Settings")(12) = 1
+On Error Goto 0
+
+Function TaskbarAdjust(y)
+  If TaskbarTop Then
+    Dim TaskbarHeight
+    TaskbarHeight = screen.height - screen.availHeight + 4
+    If y<TaskbarHeight Then y = TaskbarHeight
+  End If
+  TaskbarAdjust = y
+End Function
+
+If WinSizePos<>"" Then
+  aWinSizePos = Split(WinSizePos,",")
+  If CInt(aWinSizePos(2))=-32000 Then
+    WinSizePos=""
+  Else
+    On Error Resume Next
+    Window.ResizeTo aWinSizePos(0), aWinSizePos(1)
+    Window.MoveTo aWinSizePos(2), aWinSizePos(3)
+    GotError = Err.Number<>0
+    On Error Goto 0
+  End If
+End If
+
+If WinSizePos="" Or GotError Then
+  RequiredWidth = 700
+  If RequiredWidth>screen.availWidth Then RequiredWidth = screen.availWidth
+  Window.ResizeTo RequiredWidth, screen.availHeight
+  Window.MoveTo (screen.availWidth - RequiredWidth) / 2, TaskbarAdjust(4)
+End If
 
 Set oSearchOnly = CreateObject("Scripting.Dictionary")
 oSearchOnly.Add "ItemFolderPathDisplay",""
@@ -113,7 +132,19 @@ If CurBld>=22000 Then LWinVer = "11"
 
 If WinVer<>"7" And WinVer<>"8" And WinVer<>"10" Then
   MsgBox "Windows 7, 8, 10, or higher is required.",vbCritical,"Error"
-  Self.Close
+  self.close
+  window.close
+  Exit Sub
+End If
+
+WinSys = oWSH.ExpandEnvironmentStrings("%SystemRoot%") & "\System32\"
+Set oFile = oApp.Namespace(0).ParseName(WinSys & "MSHTML.dll")
+MSHTMLVer = CInt(Split(oFile.ExtendedProperty("System.Software.ProductVersion"),".")(0))
+
+If MSHTMLVer<11 Then
+  MsgBox "MSHTML 11 is required. Update IE to get the latest MSHTML.",vbCritical,"Error"
+  self.close
+  window.close
   Exit Sub
 End If
 
@@ -121,28 +152,29 @@ HighContrast = oWSH.RegRead("HKCU\Control Panel\Accessibility\HighContrast\Flags
 
 ' This code allows the script to run from a UNC or mapped drive
 ' whether it's double-clicked or found with Windows Search
-MyPath = Mid(Document.url,8)
-MyFolder = oFSO.GetParentFolderName(MyPath)
-oWSH.CurrentDirectory = MyFolder
+
+If Not oFSO.FolderExists("Language") Then oWSH.CurrentDirectory = window.external.ExecutableDir
+MyFolder = oWSH.CurrentDirectory
 
 If InStr(MyFolder,"[") Or InStr(MyFolder,"]") Then
   a = "Current directory: " & MyFolder & Z & Z
   b = "Due to a PowerShell issue, this script cannot run from a directory containing '[' or ']'"
   c = Z & Z & "Please rename the current directory."
   MsgBox a & b & c,vbCritical,"Error"
-  Self.Close
+  self.close
+  window.close
   Exit Sub
 End If
   
 Temp = oWSH.ExpandEnvironmentStrings("%Temp%")
 TempFile = Temp & "\WinSetView.tmp"
-LangDir = ".\Language\"
-PartsDir = ".\AppParts\"
-AppData = ".\AppData"
-Backup = ".\AppData\Backup"
+
+LangDir = MyFolder & "\Language\"
+PartsDir = MyFolder & "\AppParts\"
+ToolsDir = MyFolder & "\Tools\"
+AppData = MyFolder & "\AppData"
+Backup = MyFolder & "\AppData\Backup"
 FontsFile = PartsDir & "Fonts.txt"
-FileDialogExe = PartsDir & "FileDialog.exe"
-ModalHTA = PartsDir & "Modal.hta"
 ThemeFile = PartsDir & "Themes.ini"
 
 If WinVer="7" Or WinVer="8" Then
@@ -152,9 +184,6 @@ If WinVer="7" Or WinVer="8" Then
   GrpDnArrow = "(↓)"
   LRArrow = "←→"
   OptIcon = "☼"
-  CopyIcon = "©"
-  PasteIcon = "✍"
-  InsIcon = "≈"
   Warning = "!"
   DetailsIcon = "⋮⋮"
   RightClickIcon = "⋮"
@@ -165,9 +194,6 @@ Else
   GrpDnArrow = "(⮯)"
   LRArrow = "⟷"
   OptIcon = "⚙"
-  CopyIcon = "🗐"
-  PasteIcon = "🖉"
-  InsIcon = "🔍"
   Warning = "⚠"
   DetailsIcon = "⋮⋮⋮"
   RightClickIcon = "⋮"
@@ -179,9 +205,7 @@ End If
 TestFileName = Replace(Replace(Replace(Now(),"/",""),":","")," ","") & ".txt"
 TestFile = ".\" & TestFileName
 On Error Resume Next
-Set oFile = oFSO.OpenTextFile(TestFile,ForWriting,True,Ansi)
-oFile.Write ""
-oFile.Close
+oFSO.OpenTextFile(TestFile,ForWriting,True,Ansi).Write("")
 On Error Goto 0
 If oFSO.FileExists(TestFile) Then
   VirtualStore = oWSH.ExpandEnvironmentStrings("%LOCALAPPDATA%") & "\VirtualStore" & Mid(MyFolder,3) & "\"
@@ -189,9 +213,18 @@ If oFSO.FileExists(TestFile) Then
   oFSO.DeleteFile(TestFile)
 Else
   AppData = oWSH.ExpandEnvironmentStrings("%APPDATA%") & "\WinSetView"
+  Backup = AppData & "\Backup"
 End If
 If Not oFSO.FolderExists(AppData) Then oFSO.CreateFolder(AppData)
 If Not oFSO.FolderExists(Backup) Then oFSO.CreateFolder(Backup)
+
+' Copy INI files to redirected AppData folder
+
+If AppData <> MyFolder & "\AppData" Then
+  On Error Resume Next
+  oFSO.CopyFile MyFolder & "\AppData\*.ini",AppData & "\", False
+  On Error Goto 0
+End If
 
 ' See if there are any backup reg files in the Backup folder
 
@@ -218,31 +251,20 @@ End Sub
 
 'Calculate current window size and position and save to registry
 
-Sub window_OnBeforeUnload
-  Dim w, h, xpad, ypad, wpad, hpad
-  w = Document.documentElement.clientWidth
-  h = Document.documentElement.clientHeight
-  x = window.screenLeft
-  y = window.screenTop
-  window.MoveTo screen.Width,screen.Height
-  window.ResizeTo 500,500
-  wpad = 500 - Document.documentElement.clientWidth
-  hpad = 500 - Document.documentElement.clientHeight
-  xpad = window.screenLeft - screen.Width
-  ypad = window.screenTop - screen.Height
-  oWSH.RegWrite "HKCU\Software\WinSetView\WinSizePos",w+wpad & "," & h+hpad & "," & x-xpad & "," & y-ypad
-End Sub
-
-' On exit kill any open instances of filedialog.exe
-
-Sub window_OnUnload
-  oWSH.Run "TaskKill /im FileDialog.exe /f",0,False
+Sub window_onUnload
+  Dim w, h
+  w = window.external.Width
+  h = window.external.Height
+  x = window.external.Left
+  y = window.external.Top
+  If x<>-32000 Then oWSH.RegWrite "HKCU\Software\WinSetView\WinSizePos",w & "," & h & "," & x & "," & y
 End Sub
 
 Sub window_OnLoad
 
   Vp1.innerHTML = Version
   Vp2.innerHTML = Version
+  Vp3.innerHTML = Version
 
   'Populate language dropdown menu
   
@@ -306,6 +328,7 @@ Sub window_OnLoad
   If WinVer="7" Or WinVer="8" Then
     bc1.Value = "⊕"
     bc2.Value = "⊕"
+    bc3.Value = "⊕"
     ba.Value = "↑↓"
   End If
 
@@ -315,6 +338,33 @@ Sub window_OnLoad
   ' Set up pages in selected language and font
   UpdateLang False
 
+  ExeCheck
+  
+  ClearBlock ToolsDir
+
+End Sub
+
+Sub ClearBlock(Folder)
+  On Error Resume Next
+  Set oFolder = oFSO.GetFolder(Folder)
+  For Each oFile In oFolder.Files
+    oFSO.OpenTextFile(oFile.Path & ":Zone.Identifier",ForWriting).Write ""
+  Next
+  On Error Goto 0
+End Sub
+
+Sub ExeCheck
+  If Not oFSO.FileExists(WinSys & "WindowsPowerShell\v1.0\PowerShell.exe") Then ExeErr = ExeErr & "PowerShell.exe" & Z
+  ArrExe = Split("TaskKill.exe,Icacls.exe,Reg.exe,Cmd.exe",",")
+  For i = 0 To UBound(ArrExe)
+    If Not oFSO.FileExists(WinSys & ArrExe(i)) Then ExeErr = ExeErr & ArrExe(i) & Z
+  Next
+  If ExeErr<>"" Then
+    MsgBox "The following required system files were not found:" & Z & Z & ExeErr,vbCritical,"Error"
+    self.close
+    window.close
+    Exit Sub
+  End If
 End Sub
 
 Sub UpdateCheck
@@ -336,35 +386,22 @@ Sub UpdateCheck
     If Not BetaVer Then Beta = False
     hb.Value = ArrLang(46)
     Vp1.innerHTML = Version & " (" & ArrLang(45) & " " & CheckVer & ")"
-    RequiredWidth = twid.ScrollWidth + Int(BaseScale * 50)
+    UpdateRequiredWidth
   End If
+End Sub
+
+Sub UpdateRequiredWidth
+  RequiredWidth = twid.ScrollWidth + Int(BaseScale * 54)
+  If RequiredWidth>screen.availWidth Then RequiredWidth = screen.availWidth
 End Sub
 
 ' The following code is needed for scaling the checkboxes and radio buttons
 
 Function GetScale()
   GetScale = 1.0
-  Value = 0
   On Error Resume Next
-  Value = oWSH.RegRead("HKCU\Control Panel\Desktop\Win8DpiScaling")
-  If Value=1 Then
-    'Custom scaling is set
-    Value = 96
-    Value = oWSH.RegRead("HKCU\Control Panel\Desktop\WindowMetrics\AppliedDPI")
-    GetScale = Value/96
-  Else
-    'See if standard scaling is set
-    Key = "Control Panel\Desktop\PerMonitorSettings"
-    Result = oReg.EnumKey(HKCU, Key, ArrKeys)
-    If Result=0 Then
-      'Assume first monitor in list is the one we want
-      For Each SubKey In ArrKeys
-        Exit For
-      Next
-      Value = oWSH.RegRead("HKCU\" & Key & "\" & SubKey & "\DPIValue")
-      If Value>0 Then GetScale = 1 + (Value * 0.25)
-    End If
-  End If
+  'If user changes scale, they must logout/login for this registry value to change
+  GetScale = oWSH.RegRead("HKCU\Control Panel\Desktop\WindowMetrics\AppliedDPI") / 96
   On Error Goto 0
 End Function
 
@@ -410,7 +447,8 @@ Sub SetLang
     Else
       MsgBox "Language folder missing: " & LangDir & Language,vbCritical,"Error"
     End If
-    Self.Close
+    self.close
+    window.close
     Exit Sub
   End If
 End Sub
@@ -439,9 +477,7 @@ Sub UpdateLang(OnChange)
     Language = lang.options(LangIndex).value
     LangFile = LangDir & Language & "\Labels.txt"
     If oFSO.FileExists(LangFile) Then
-      Set oFile = oFSO.OpenTextFile(LangFile,ForReading,,Unicode)
-      LangData = oFile.ReadAll
-      oFile.Close
+      LangData = oFSO.OpenTextFile(LangFile,ForReading,,Unicode).ReadAll
     End If
   End If
 
@@ -516,16 +552,14 @@ Sub UpdateLang(OnChange)
   ' Get Details view column headings
   
   ColFile = LangDir & Language & "\Columns-Win" & LWinVer & ".txt"
-  Set oFile = oFSO.OpenTextFile(ColFile,ForReading,,Unicode)
-  ColData = oFile.ReadAll
-  oFile.Close
+  ColData = oFSO.OpenTextFile(ColFile,ForReading,,Unicode).ReadAll
   ArrColData = Split(ColData,Z)
   ReDim ArrHTML2(UBound(ArrColData))
   
   ' Dynamically generate HTML page data
   BuildPages
   
-  Document.title = ArrLang(1)
+  window.external.SetWindowTitle("WinSetView (" & ArrLang(1) & ")")
   lang.SelectedIndex = LangIndex
   Size1.SelectedIndex = SelectedSize1 - 8
   Size2.SelectedIndex = SelectedSize2 - 8
@@ -537,9 +571,7 @@ Sub UpdateLang(OnChange)
 
   ' Get View menu data from file
 
-    Set oFile = oFSO.OpenTextFile(ViewFile,ForReading,,Unicode)
-    ViewData = oFile.ReadAll
-    oFile.Close
+    ViewData = oFSO.OpenTextFile(ViewFile,ForReading,,Unicode).ReadAll
     ArrView = Split(ViewData,Z)
 
     ' Populate the two View menus on the Options page
@@ -553,8 +585,6 @@ Sub UpdateLang(OnChange)
       Set oOption = Document.createElement("Option")
       oOption.Text =  ArrView(j) 
       oOption.Value = j
-      If j=0 Then oOption.Disabled = True
-      nwv.Add(oOption)
     Next
       
     ' Populate each folder type setting (View, IconSize, GroupBy, SortBy, and Columns to display)
@@ -650,9 +680,7 @@ Sub UpdateLang(OnChange)
   If Not oFSO.FileExists(FontsFile) Then
       ArrFonts = Array(SelectedFont1,SelectedFont2)
   Else
-    Set oFile = oFSO.OpenTextFile(FontsFile,ForReading,,Ansi)
-    Fonts = oFile.ReadAll
-    oFile.Close
+    Fonts = oFSO.OpenTextFile(FontsFile,ForReading,,Ansi).ReadAll
     ArrFonts = Split(Fonts,Z)
   End If
 
@@ -705,6 +733,8 @@ Sub UpdateLang(OnChange)
   SetInterface
   
   SetTheme
+
+  xschange
 
 End Sub
 
@@ -791,114 +821,77 @@ End Sub
 ' Populate HTML pages directly from scripting dictionary for some settings
 
 Sub Dict2Dom
-  wd.checked = oSettings.Item("[Options]Reset")
-  x = oSettings.Item("[Options]ShowExt")
-  If x="" Then se.Checked = 1 Else se.Checked = x
-  x = oSettings.Item("[Options]CompView")
-  If x="" Then cv.Checked = 1 Else cv.Checked = x
-  gn.checked = oSettings.Item("[Options]Generic")
-  x = oSettings.Item("[Options]SearchOnly")
-  If x="" Then so.Checked = 1 Else so.Checked = x
-  x = oSettings.Item("[Options]SetVirtualFolders")
-  If x="" Then vf.Checked = 1 Else vf.Checked = x
-  ka.checked = oSettings.Item("[Options]KeepViews")
-  nf.checked = oSettings.Item("[Options]NoFolderThumbs")
-  tp.checked = oSettings.Item("[Options]ThisPCoption")
-  nw.checked = oSettings.Item("[Options]NetworkOption")
-  x = oSettings.Item("[Options]ThisPCNG")
-  If x="" Then tpg.Checked = 1 Else tpg.Checked = x
-  x = oSettings.Item("[Options]NetworkNG")
-  If x="" Then nwg.Checked = 1 Else nwg.Checked = x
-  x = oSettings.Item("[Options]ThisPCView")
-  If x="" Then tpv.SelectedIndex = 1 Else tpv.SelectedIndex = x
-  x = oSettings.Item("[Options]NetworkView")
-  If x="" Then nwv.SelectedIndex = 1 Else nwv.SelectedIndex = x
-  x = oSettings.Item("[Options]Scroll")
-  If x="" Then xs.SelectedIndex = 1 Else xs.SelectedIndex = x: xschange
-  x = oSettings.Item("[Options]Interface")
-  If x="" Then IFace.SelectedIndex = 1 Else IFace.SelectedIndex = x
-  x = oSettings.Item("[Options]ThemeIndex")
-  If x="" Then Theme.SelectedIndex = 1 Else Theme.SelectedIndex = x
+  wd.checked = SetInitial("[Options]Reset",0)
+  se.Checked = SetInitial("[Options]ShowExt",1)
+  cv.Checked = SetInitial("[Options]CompView",1)
+  gn.checked = SetInitial("[Options]Generic",0)
+  so.Checked = SetInitial("[Options]SearchOnly",1)
+  vf.Checked = SetInitial("[Options]SetVirtualFolders",1)
+  ka.checked = SetInitial("[Options]KeepViews",0)
+  nf.checked = SetInitial("[Options]NoFolderThumbs",0)
+  ua.checked = SetInitial("[Options]UnhideAppData",0)
+  sc.checked = SetInitial("[Options]ClassicSearch",0)
+  hg.checked = SetInitial("[Options]HomeGrouping",0)
+  cm.checked = SetInitial("[Options]ClassicContextMenu",0)
+  si.checked = SetInitial("[Options]NoSearchInternet",0)
+  sh.checked = SetInitial("[Options]NoSearchHighlights",0)
+  tp.checked = SetInitial("[Options]ThisPCoption",1)
+  tpg.Checked = SetInitial("[Options]ThisPCNG",0)
+  tpv.SelectedIndex = SetInitial("[Options]ThisPCView",3)
+  xs.SelectedIndex = SetInitial("[Options]Scroll",1)
+  IFace.SelectedIndex = SetInitial("[Options]Interface",1)
+  Theme.SelectedIndex = SetInitial("[Options]ThemeIndex",1)
 End Sub
+
+Function SetInitial(DictEntry,Default)
+  SetInitial = oSettings.Item(DictEntry)
+  If SetInitial="" Then SetInitial = Default
+  SetInitial = Int(SetInitial)
+End Function
+
+Function FileDialog(Action,Path,Filter,EnableMulti,ReturnMulti)
+  Dim ret: FileDialog = "": Filter = Filter & "|"
+  Select Case LCase(Action)
+    Case "open"
+      ret = window.external.OpenFileDialog(Path,Filter,EnableMulti)
+    Case "save"
+      ret = window.external.SaveFileDialog(Path,Filter,EnableMulti)
+  End Select
+  If InStr(ret,":0")>0 Then Exit Function
+  ret = Replace(ret,"}","")
+  ret = Replace(ret,"]","")
+  ret = Replace(ret,"[","")
+  ret = Split(ret,""":""")(1)
+  ret = Replace(ret,"\\","\")
+  ret = Replace(ret,""",""","|")
+  ret = Replace(ret,"""","")
+  If ReturnMulti Then FileDialog = ret Else FileDialog = Split(ret,"|")(0)
+End Function
 
 ' Load Settings button
 
 Sub LoadSettings
-  oWSH.Run "TaskKill /im FileDialog.exe /f",0,True
-  If Not oFSO.FileExists(FileDialogExe) Then
-    MsgBox "File missing: " & FileDialogExe,vbCritical,"Error"
-  Else
-    oWSH.Run FileDialogExe & " Open Multi ""*.ini|*.ini"" ..\AppData",0,False
-    Window.SetTimeOut "GetINIFile()", 500
+  File = FileDialog("Open",AppData,"*.ini|*.ini",True,False)
+  If File<>"" Then
+    KeepAdvanced = True
+    Set oSettings = Ini2Dict(File)
+    SetLang
+    UpdateLang False
   End If
 End Sub
 
 ' Save Settings button
 
 Sub SaveSettings
-  oWSH.Run "TaskKill /im FileDialog.exe /f",0,True
-  If Not oFSO.FileExists(FileDialogExe) Then
-    MsgBox "File missing: " & FileDialogExe,vbCritical,"Error"
-  Else
-    oWSH.Run FileDialogExe & " Save ""*.ini|*.ini"" ..\AppData",0,False
-    Window.SetTimeOut "SaveINIFile()", 500
-  End If
+  File = FileDialog("Save",AppData & "\","*.ini|*.ini",False,False)
+  If File<>"" Then Var2Ini(File)
 End Sub
 
 ' Restore button
 
 Sub Restore
-  oWSH.Run "TaskKill /im FileDialog.exe /f",0,True
-  If Not oFSO.FileExists(FileDialogExe) Then
-    MsgBox "File missing: " & FileDialogExe,vbCritical,"Error"
-  Else
-    oWSH.Run FileDialogExe & " Open Multi ""*.reg|*.reg"" ..\AppData\Backup",0,False
-    Window.SetTimeOut "GetRegFile()", 500
-  End If
-End Sub
-
-' Wait for Open INI filename to be selected in FileDialog.exe
-
-Sub GetINIFile
-  On Error Resume Next
-  File = oWSH.RegRead("HKCU\Software\FileDialog\")
-  On Error Goto 0
-  If File="?" Then
-    Window.SetTimeOut "GetINIFile()", 500
-  Else
-    If File<>"" Then
-      KeepAdvanced = True
-      Set oSettings = Ini2Dict(File)
-      SetLang
-      UpdateLang False
-    End If
-  End If
-End Sub
-
-' Wait for Save INI filename to be entered/selected in FileDialog.exe
-
-Sub SaveINIFile
-  On Error Resume Next
-  File = oWSH.RegRead("HKCU\Software\FileDialog\")
-  On Error Goto 0
-  If File="?" Then
-    Window.SetTimeOut "SaveINIFile()", 500
-  Else
-    If File<>"" Then Var2Ini(File)
-  End If
-End Sub
-
-' Wait for Open REG filename to be selected in FileDialog.exe
-
-Sub GetRegFile
-  On Error Resume Next
-  File = oWSH.RegRead("HKCU\Software\FileDialog\")
-  On Error Goto 0
-  If File="?" Then
-    Window.SetTimeOut "GetRegFile()", 500
-  Else
-    If File<>"" Then RunScript File
-  End If
+  File = FileDialog("Open",Backup,"*.reg|*.reg",True,False)
+  If File<>"" Then RunScript File
 End Sub
 
 ' Write vars to INI file
@@ -922,6 +915,12 @@ Sub Var2Ini(INIFile)
   oFile.Write "SetVirtualFolders=" & Abs(Int(vf.Checked)) & Z
   oFile.Write "KeepViews=" & Abs(Int(ka.Checked)) & Z
   oFile.Write "NoFolderThumbs=" & Abs(Int(nf.Checked)) & Z
+  oFile.Write "UnhideAppData=" & Abs(Int(ua.Checked)) & Z
+  oFile.Write "ClassicSearch=" & Abs(Int(sc.Checked)) & Z
+  oFile.Write "HomeGrouping=" & Abs(Int(hg.Checked)) & Z
+  oFile.Write "ClassicContextMenu=" & Abs(Int(cm.Checked)) & Z
+  oFile.Write "NoSearchInternet=" & Abs(Int(si.Checked)) & Z
+  oFile.Write "NoSearchHighlights=" & Abs(Int(sh.Checked)) & Z
   On Error Resume Next
   x = oWSH.RegRead("HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell\Logo")
   On Error Goto 0
@@ -932,9 +931,6 @@ Sub Var2Ini(INIFile)
   oFile.Write "ThisPCoption=" & Abs(Int(tp.Checked)) & Z
   oFile.Write "ThisPCView=" & tpv.SelectedIndex & Z
   oFile.Write "ThisPCNG=" & Abs(Int(tpg.Checked)) & Z
-  oFile.Write "NetworkOption=" & Abs(Int(nw.Checked)) & Z
-  oFile.Write "NetworkView=" & nwv.SelectedIndex & Z
-  oFile.Write "NetworkNG=" & Abs(Int(nwg.Checked)) & Z
   For i = 0 To UBFolderType
     oFile.Write "[" & ArrFolderType(i) & "]" & Z
     If i>0 Then 
@@ -964,17 +960,13 @@ End Sub
 Sub Inspection(i)
   Key = "\Software\Microsoft\Windows\CurrentVersion\Explorer\FolderTypes\"
   oWSH.Run "Reg Export " & "HKLM" & Key & ArrFolderTypeGUID(i) & " " & Q & TempFile & Q & " /y",0,True
-  Set oFile = oFSO.OpenTextFile(TempFile,ForReading,,Unicode)
-  Txt1Data = oFile.ReadAll
-  oFile.Close
+  Txt1Data = oFSO.OpenTextFile(TempFile,ForReading,,Unicode).ReadAll
   Txt1.Value = Txt1Data
 
   oFSO.DeleteFile TempFile
   oWSH.Run "Reg Export " & "HKCU" & Key & ArrFolderTypeGUID(i) & " " & Q & TempFile & Q & " /y",0,True
   If oFSO.FileExists(TempFile) Then
-    Set oFile = oFSO.OpenTextFile(TempFile,ForReading,,Unicode)
-    Txt2Data = oFile.ReadAll
-    oFile.Close
+    Txt2Data = oFSO.OpenTextFile(TempFile,ForReading,,Unicode).ReadAll
     Txt2.Value = Txt2Data
   End If
 
@@ -993,15 +985,28 @@ Sub Inspection(i)
 End Sub
 
 Function Modal(Title,Args,DialogTop)
-  If Not oFSO.FileExists(ModalHTA) Then
-    MsgBox "File missing: " & ModalHTA,vbCritical,"Error"
-  Else
-    x = Abs(Int(Instr(LCase(sTheme),"dark")>0))
-    If HighContrast Then x = 2
-    DialogArgs = Title & ";" & SelectedFont1 & ";" & SelectedSize1 & ";" & Scale & ";" & x & ";" & Args
-    DialogOptions = "Scroll:No; DialogWidth:" & Int(20*Scale) & "em; dialogLeft:" & window.screenLeft+Int(2*Scale) & "; dialogTop:" & DialogTop
-    Modal = ShowModalDialog(ModalHTA,DialogArgs,DialogOptions)
-  End If
+
+  Dim w, t
+
+  t = Abs(Int(Instr(LCase(sTheme),"dark")>0))
+  If HighContrast Then t = 2
+
+  w = Int(Document.documentElement.clientWidth)
+  w = Math.Min(w,Int(350*Scale))
+  
+  x = window.screenLeft+Int(2*Scale)
+  y = DialogTop
+
+  DialogArgs = Title & ";" & SelectedFont1 & ";" & SelectedSize1 & ";" & Scale & ";" & t & ";" & w & ";" & x & ";" & y & ";" & Args
+  
+	Dim param,aArgs
+	Set param = New ClassParam
+	param.param1 = DialogArgs
+
+  window.external.CustomDialog "Modal.htm", param, w, 480, 0
+
+	Modal = param.param1
+	
 End Function
 
 Sub FTOptions(i)
@@ -1065,7 +1070,6 @@ Sub Options
   Pg1.Style.Display = "none"
   Pg4.Style.Display = "inline"
   OptionThisPC
-  OptionNetwork
 End Sub
 
 Sub Arrange
@@ -1099,15 +1103,20 @@ Sub RunScript(Param)
   If Right(Param,3)="ini" Then
     If window.event.altKey Then x = "-NoExit"
   End If
-  CmdLine = "Powershell.exe " & x & " -ExecutionPolicy Bypass -File .\WinSetView.ps1 " & Chr(34) & Param & Chr(34)
+  CmdLine = "Powershell.exe " & x & " -NoLogo -ExecutionPolicy Bypass -File .\WinSetView.ps1 " & Chr(34) & Param & Chr(34)
   oWSH.Run CmdLine,1,False
-  Window.Close
+  self.close
+  window.close
 End Sub
 
 ' Set values for column selection page
 
 Sub SelectColumns(i)
   FTindex = i
+
+  'These two lines added June 2023 to disable Sort 4
+  ArrSort4(FTindex)=""
+  cbs4.style.display = "none"
 
   'Reset everything
   For i = 0 To UBound(ArrColData)
@@ -1363,14 +1372,6 @@ Sub OptionThisPC
     otp.Style.Display = "block"
   Else
     otp.Style.Display = "none"
-  End If
-End Sub
-
-Sub OptionNetwork
-  If nw.Checked=True Then
-    onw.Style.Display = "block"
-  Else
-    onw.Style.Display = "none"
   End If
 End Sub
 
@@ -1714,7 +1715,7 @@ Sub UpdateFont1
   Set oElements = Document.GetElementsByTagName("input")
   For Each oElement in oElements
     If oElement.Type="button" Or oElement.Type="text" Then
-      oElement.Style.FontFamily = SelectedFont1
+      If oElement.className<>"icon" Then oElement.Style.FontFamily = SelectedFont1
       oElement.Style.FontSize = SelectedSize1 & "pt"
     End If
     If oElement.Type="checkbox" Or oElement.Type="radio" Then
@@ -1732,10 +1733,10 @@ Sub UpdateFont1
     oElement.Style.FontSize = SelectedSize1 & "pt"
   Next
 
-  RequiredWidth = twid.ScrollWidth + Int(BaseScale * 50)
-  If RequiredWidth>screen.availWidth Then RequiredWidth = screen.availWidth
+  UpdateRequiredWidth
 
   UpdateCheck
+
   Recenter
 
   Sec1.Style.MarginTop = fix1.ScrollHeight
@@ -1755,7 +1756,7 @@ End Sub
 Sub Recenter
   If  WinSizePos="" Then
     Self.ResizeTo RequiredWidth, screen.availHeight
-    Self.MoveTo (screen.availWidth - RequiredWidth) / 2, 4
+    Self.MoveTo (screen.availWidth - RequiredWidth) / 2, TaskbarAdjust(4)
   End If
 End Sub
 
@@ -1892,7 +1893,10 @@ End Sub
 Sub Help
   x = "https://lesferch.github.io/WinSetView"
   If Beta Then x = "https://github.com/LesFerch/WinSetView/blob/beta/README.md"
+  On Error Resume Next
   oWSH.Run x
+  If Err.number<>0 Then MsgBox "An error occurred attempting to open" & Z & Z & x
+  On Error GoTo 0
 End Sub
 
 ' HTML interface starts here with the script-generated pages
@@ -1905,9 +1909,9 @@ Sub BuildPages
     Xinc = "":Xcop = "": Xpas = "": Xln2 =""
     If i>0 Then
       Xinc = "<input type=checkbox id=" & i & "Include onclick=IncludeChange(" & i & ") Checked>"
-      Xcop = "<div class=tip><input type=button id=" & i & "Copy value=" & CopyIcon & " onclick=FTCopy(" & i & ")><span class=tiptext># 40 #</span></div> "
-      Xpas = "<div class=tip><input type=button id=" & i & "Paste value=" & PasteIcon & " onclick=FTPaste(" & i & ")><span class=tiptext># 41 #</span></div>"
-      Xln2 = "<div class=fo><input type=checkbox id=" & i & "Inherit onclick=InheritChange(" & i & ") Checked># 21 # <input type=button id=" & i & "Inspect value=" & InsIcon & " style='padding:0' onclick=Inspection(" & i & ")></div>"
+      Xcop = "<div class=tip><input type=button class=icon id=" & i & "Copy value=📋 onclick=FTCopy(" & i & ")><span class=tiptext># 40 #</span></div> "
+      Xpas = "<div class=tip><input type=button class=icon id=" & i & "Paste value=🖌️ onclick=FTPaste(" & i & ")><span class=tiptext># 41 #</span></div>"
+      Xln2 = "<div class=fo><input type=checkbox id=" & i & "Inherit onclick=InheritChange(" & i & ") Checked># 21 # <input type=button class=icon id=" & i & "Inspect value=🔍 style='padding:0' onclick=Inspection(" & i & ")></div>"
       Xvue = "<div class=fo id=" & i & "FTView></div>"
     End If
     ArrHTML1(i) = Xinc & "<div class=ft id=" & i & "FTtitle>" & ArrFolderTypeLang(i) & "</div><br>" & Z &_
@@ -1915,7 +1919,7 @@ Sub BuildPages
     "<div class=fo id=" & i & "FTcontrols><select id=" & i & "View onchange=ViewChange(" & i & ")></select>" & Z &_
     "<input type=text class=is id=" & i & "IconSize OnChange=IconSizeChange(" & i & ")>" & Z &_
     "<input type=button id=" & i & "SelCol value='# 24 #' onclick=SelectColumns(" & i & ")>" & Z &_
-    "<div class=tip><input type=button id=" & i & "Option value=" & OptIcon & " onclick=FTOptions(" & i & ")><span class=tiptext># 3 #</span></div>" & Z &_
+    "<div class=tip><input type=button class=icon id=" & i & "Option value=⚙ onclick=FTOptions(" & i & ")><span class=tiptext># 3 #</span></div>" & Z &_
     Xcop & Xpas & "</div>" & Z &_
     Xvue & Z &_
     "<div class=cta id=" & i & "ColShow></div>" & Z &_
@@ -1940,8 +1944,8 @@ Sub BuildPages
     "<td><input type=text class=cw id=W~" & C1 & " maxlength=3 onclick=PixelInput('" & C1 & "')></td>" &_
     "<td><input type=checkbox onclick=CBMClick('" & C1 & "') id=M~" & C1 & " Value='" & C1 & "'></td>" &_
     "<td><input type=checkbox onclick=CBPClick('" & C1 & "') id=P~" & C1 & " Value='" & C1 & "'></td>" &_
-    "<td><span id=V~" & C1 & " class=" & x & " onmouseover='ShowC1" & Q & C1 & Q &_
-    "' onmouseout='ShowC2" & Q & C1 & Q & "," & Q & Replace(C2,"'","`") & Q & "'>" & C2 & "</span></td>" &_
+    "<td><span id=V~" & C1 & " class=" & x & " onmouseover='ShowC1 " & Q & C1 & Q &_
+    "' onmouseout='ShowC2 " & Q & C1 & Q & "," & Q & Replace(C2,"'","`") & Q & "'>" & C2 & "</span></td>" &_
     "<td><input type=text style=display:none id=L~" & C1 & " Value='" & C2 & "'></td>" &_
     "<td><input type=text style=display:none id=N~" & C1 & "></td></tr>"
   Next
@@ -1975,9 +1979,12 @@ Sub document_onKeyDown
 End Sub
 
 </script>
+
 <style>
+  @font-face {font-family:Segoe UI Emoji; src:url(seguiemj.eot)}
   body  {background-color:LemonChiffon; font-family:Segoe UI; font-size:11pt}
-  input[type="button"] {font-family:Segoe UI; font-size:11pt}
+  input[type="button"] {font-family:Segoe UI Emoji; font-size:11pt}
+  .icon {font-family:Segoe UI Emoji}
   select {font-family:Segoe UI; font-size:11pt}
   textarea {font-family:Consolas; font-size:10pt}
   h2    {font-size:1.5em}
@@ -1985,6 +1992,11 @@ End Sub
   #gn   {margin-top:3pt}
   #ka   {margin-top:3pt}
   #nf   {margin-top:3pt}
+  #ua   {margin-top:3pt}
+  #sc   {margin-top:3pt}
+  #cm   {margin-top:3pt}
+  #si   {margin-top:3pt}
+  #sh   {margin-top:3pt}
   #so   {margin-top:3pt}
   .cta  {margin-top:5pt; width:100%}
   #fix1 {position:fixed; left:0; top:0; width:100%; background-color:LemonChiffon}
@@ -2023,7 +2035,6 @@ End Sub
   .X3HC {font-style:normal}
   .X4HC {font-style:italic}
   #tpv  {margin-left:1.5em; margin-top:3pt}
-  #nwv  {margin-left:1.5em; margin-top:3pt}
   .is   {width:2em}
   .noshow {display:none}
 
@@ -2164,20 +2175,28 @@ End Sub
 
   <div id=Pg4>
     <input type=button value='&#223;' ID=BkP4 OnClick=Back2Pg1()>
+    <div class='tip fl2'><input type=button value='# 31 #' onclick=Help()>
+    <span id=Vp3 class=tiptext></span></div>
+    <div class='tip fl3'><input id=bc3 type=button value='⛶' onclick=RecenterButton()>
+    <span class=tiptext># 42 #</span></div>
     <h2># 3 #</h2>
     <input type=checkbox id=se Checked># 8 #<br><br>
     <input type=checkbox id=cv Checked># 27 #<br><br>
+    <input type=checkbox id=cm># 47 #<br><br>
+    <input type=checkbox id=si># 48 #<br><br>
+    <input type=checkbox id=sh># 49 #<br><br>
+    <input type=checkbox id=nf># 35 #<br><br>
+    <input type=checkbox id=ua># 50 #<br><br>
+    <input type=checkbox id=sc># 51 #<br><br>
     <div id=Sec4>
       <input type=checkbox id=so Checked onclick=OptionSearchOnly()># 9 #<br><br>
       <input type=checkbox id=vf Checked># 29 #<br><br>
-      <input type=checkbox id=nf># 35 #<br><br>
       <input type=checkbox id=tp onclick=OptionThisPC()># 13 #<br>
       <div id=otp><select id=tpv></select> <input type=checkbox id=tpg checked># 25 #</div><br>
-      <input type=checkbox id=nw onclick=OptionNetwork()># 30 #<br>
-      <div id=onw><select id=nwv></select> <input type=checkbox id=nwg checked># 25 #</div><br>
       <div id=ao>
       <input type=checkbox id=gn Checked># 10 #<br><br>
       <input type=checkbox id=ka># 11 #<br><br>
+      <input type=checkbox id=hg># 52 #<br><br>
       </div>
     </div>
   </div>

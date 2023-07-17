@@ -1,9 +1,13 @@
 # How to Download and Run
 <!--
-To view this document formatted (instead of as raw text) just click the Help button in WinSetView.hta.
+To view this document formatted (instead of as raw text) just click the Help button in WinSetView.
 You can also manually navigate your browser to: https://lesferch.github.io/WinSetView.
 -->
 Follow the steps below to download, extract, and run WinSetView for the first time.
+
+**Note**: If you got WinSetView from [here](https://lesferch.github.io/WinSetView), it's 100% clean, but you may find that some security software will falsely detect it as potentially unwanted or potentially malicious. That's the nature of such software. It will err on the side of caution. If you encounter that situation, you will need to disable or, at least, dial-back the protection settings of your security software. For example, in **Bitdefender**, you must temporarily turn off **Advanced Threat Defense** to allow WinSetView to launch the PowerShell script that applies the folder view settings.
+
+**Note**: Windows Defender should not have any issue with WinSetView, but if you've installed Windows from a recovery partition or older ISO file, you may be running Defender with old definitions that falsely detect it as malware. Please ensure that Windows Defender is fully up to date before attempting to download or run WinSetView. If you still have an issue with Windows Defender, please open an issue on the [issues page](https://github.com/LesFerch/WinSetView/issues).
 
 ## Step 1: Click the WinSetView Download Link
 
@@ -25,6 +29,8 @@ Alternatively, you can open the folder (usually the **Downloads** folder) using 
 
 Right-click the downloaded zip file and select **Extract All...**.
 
+**Note**: If you have a third-party unzip tool installed (such as 7-Zip, Bandizip, WinZip, WinRAR, etc.) then you may see different unzip options when you right-click the zip file. Any option that unzips the file will do. If there is something like a "smart unzip" option, that is usually the best choice, and won't require editing the unzip path, as indicated below.
+
 ![02](https://user-images.githubusercontent.com/79026235/153107248-5f0ccc0b-ca21-4102-8492-1df02129f978.png)
 
 Edit the displayed folder path to remove the **WinSetView-main** part and then click **Extract**.
@@ -39,44 +45,39 @@ Once the extraction is complete, you should have a **WinSetView-main** folder. Y
 
 ## Step 3: Open the App
 
-Double-click **WinSetView.hta** to open the app.
+Open the extracted folder and you should see **WinSetView.exe**. If you do not see the **exe** file extension, check **File name extensions** in the Windows File Explorer **View** menu.
 
-**Note**: If you do not see the **hta** file extension, check **File name extensions** in the Windows File Explorer **View** menu.
+![image](https://user-images.githubusercontent.com/79026235/229966497-b357c88d-45fa-4a5d-993e-661b8d18ead4.png)
 
-![image](https://user-images.githubusercontent.com/79026235/153104503-bd7122e4-6e9e-4a41-abbb-707935cc77a7.png)
+To avoid annoying "unrecognized app" notifications, right-click **WinSetView.exe** and select **Properties**:
 
-If, after double-clicking the HTA file, you see something like the screenshot below, then the HTA file extension has been associated with Notepad (or some other text editor). See the instructions below for correctly associating the HTA extension.
+![image](https://user-images.githubusercontent.com/79026235/229967070-dbf01447-601d-49ab-bafb-2d87ab299ef8.png)
 
-![image](https://user-images.githubusercontent.com/79026235/159400974-6f39145d-737f-427d-93e2-c8645991f5ad.png)
+Then check **Unblock**, and click **OK**.
 
-If, after double-clicking the HTA file, you see something like the screenshots below, then the HTA file extension has been associated with a browser, such as Edge or Chrome. See the instructions below for correctly associating the HTA extension.
+Double-click **WinSetView.exe** to open the app.
 
-![image](https://user-images.githubusercontent.com/79026235/159401808-1a005148-059c-42f0-85b6-7c79f6658334.png)
-![image](https://user-images.githubusercontent.com/79026235/159401820-8e9fb277-07b7-4214-9f42-0f9d9847c220.png)
+If you did not unblock the file, you will probably see this message:
 
-## How to correct the HTA file association
+![image](https://user-images.githubusercontent.com/79026235/211442632-d4362bed-3600-4c32-b2c1-417b320684b7.png)
 
-Right-click **WinsetView.hta**, move down to **Open with** and select **Choose another app**.
+Click the **More info** link and you should see:
 
-![image](https://user-images.githubusercontent.com/79026235/159409762-d2cac00b-0630-4df4-8501-82fc14b7d2f8.png)
+![image](https://user-images.githubusercontent.com/79026235/211442671-34f91125-e915-4c5e-a61e-a30bb556d393.png)
 
-Select (single-click) **Microsoft (R) HTML Application host**, check **Always use this app to open .hta files** and then click **OK**.
+Click **Run anyway** to run the app.
 
-![image](https://user-images.githubusercontent.com/79026235/159409923-d67519d3-4cfb-4e22-a83a-07eb9483507e.png)
+**Note**: On Windows 11, the Publisher will be displayed as **US, New York, Leslie S Ferch, Leslie S Ferch**.
 
-## Step 4: Allow the App to Run
+**Note**: Even though WinSetView.exe is code-signed, with a certificate issued by Sectigo, the SmartScreen block will still come up because non-incorporated individual developers cannot purchase (and typically cannot afford) an extended verification (EV) certificate required to get full trust. The fact that WinSetView is provided as an open-source app via GitHub, with my personal contact information available for all to see, is much more reassurance of safety than any certificate provides. The bad actors out there can find ways to code-sign their malware. Knowing where you got the app is much more important. Although there are many trustworthy download sites, the best practice is to download from the author's web page. If you got this app from my [web page](https://lesferch.github.io/WinSetView/), that's your best protection.
 
-Windows security will not allow a downloaded app to run without your permission. When the following prompt appears, *uncheck* **Always ask before opening this file** and then click **Run**. This message will not appear again for this app.
+**Note**: If WinSetView opens to a blank page or just a minimized icon, VBScript may have been disabled or uninstalled. The latest insider builds of Windows 11 provide an option to uninstall VBScript via Apps > Optional features:
 
-![image](https://user-images.githubusercontent.com/79026235/153104571-8ffb3e64-c1b5-4c66-b67e-723e29601fdf.png)
+![image](https://user-images.githubusercontent.com/79026235/233753663-f28a2dc3-6bac-48bc-83af-c2a9c51c7e73.png)
 
-If you see the following error message, then you either only extracted **WinSetView.hta** or you are trying to run it directly from the zip file without first extracting the files. Please review the instructions and try again.
+Do not uninstall VBScript! If you've already uninstalled VBScript, using the option shown above, you can reinstall it via the **View features** button next to **Add an optional feature** at the top of that same page.
 
-![image](https://user-images.githubusercontent.com/79026235/153110135-41cee079-b244-4bae-ae5d-add8d3f2754a.png)
-
-Assuming you did not see the above error message, **WinSetView.hta** may take a few seconds to load the fist time. This delay is just Windows setting things up to allow an **hta** script to run. Subsequent launches of the app should only take about 1 second.
-
-To use the app, please follow the steps in the guide below...
+To use WinSetView, please follow the steps in the quick start guide:
 
 ![image](https://user-images.githubusercontent.com/79026235/152913587-d294de81-c8ca-428d-b351-09a564854eff.png)
 [See the quick start guide](./README.md)
