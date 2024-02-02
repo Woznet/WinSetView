@@ -1,3 +1,25 @@
+## 2.91
+
+Bug fix: Legacy row and icon spacing is not compatible with dark mode. It is now disabled and hidden when the computer is in dark mode.
+
+Enhancement: Black and white lock icon replaced with color UAC shield icon.
+
+## 2.90
+
+Feature added: Option to use Windows 10 Explorer on Windows 11.
+
+Feature added: Option to fix Desktop place in legacy dialogs in Windows 11.
+
+Feature added: Option to set a custom start folder for Explorer.
+
+Feature added: Option to enable legacy row and icon spacing.
+
+Feature added: Option to disable full row select (requires legacy spacing).
+
+Enhancement: Modal dialogs now follow theme colors.
+
+Enhancement: Large and extra large icons added to WinSetView.exe.
+
 ## 2.80
 
 Feature added: Option to disable "Let's finish" and other "suggestions".
