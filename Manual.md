@@ -17,9 +17,9 @@ This is the complete user manual. See the link below for the quick start guide.
 Compatible with Windows 7, 8, 10, and 11.
 
 Les Ferch, lesferch@gmail.com\
-GitHub repository created 2021-03-26, last updated 2024-02-08
+GitHub repository created 2021-03-26, last updated 2024-03-19
 
-[Version 2.92](./VersionHistory.md)
+[Version 2.93](./VersionHistory.md)
 
 ## Summary
 
@@ -323,8 +323,6 @@ When checked, the following "suggestion" notifications (found in "Notifications 
 
 When checked, a registry setting will be applied that will cause Windows 11 to use the Windows 10 Explorer as its default file manager. That's the Explorer that has the ribbon interface and is normally only used in Windows 11 for the Control Panel. The feature "Also apply this template to all subfolders" works in this Explorer version.
 
-**Note**: When this option is enabled, Explorer always opens at a fixed size and position on your primary display.
-
 ![image](https://github.com/LesFerch/WinSetView/assets/79026235/2aef729f-38ad-469c-b6d7-de796800992a)
 
 #### Disable numerical sort ![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896)
@@ -423,7 +421,9 @@ This option allows you to set the start folder for Explorer to "This PC", "Home 
 
 **Note**: This option will not appear if your computer is in dark mode, as it is not compatible (text will be black). If you previously enabled this option while in light mode, clicking Submit in WinSetView will automatically clear this setting so that you will be returned to light text on a dark background.
 
-When this option is enabled, rows in List and Details views are closer together, icon spacing is slightly different, and file names in icon views only wrap on certain characters, such as spaces and hyphens.
+When this option is enabled, Explorer will use the Windows Vista style view modes. Rows in List and Details views are closer together, icon row spacing is not affected by long filenames, and file names in icon views only wrap on certain characters, such as spaces and hyphens.
+
+Tiles and Content view behave in odd ways when this option is enabled. You may see one view upon setting the view and then a different view after closing and re-opening the folder. Note that Content view did not exist in Windows Vista and it's Tile mode was different than the modern Tiles view, so the odd results are not too surprising.
 
 Also, when this option is enabled, you can freely rearrange files and folders in Details and Icon views, but those arrangements will be forgotten when the folder is closed, unless you are running Windows 7, Windows 8.x, or a Windows 10 build that is lower than 1703.
 
