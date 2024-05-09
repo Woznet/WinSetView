@@ -4,7 +4,7 @@ WinSetView is a tool that will let you easily set **File Explorer default folder
 
 Please follow the [quick start guide](./README.md) to download the app and set your initial folder view preferences. Running the app for the first time without following the guide may lead to confusion, as there are a lot of options on the screen.
 
-![image](https://user-images.githubusercontent.com/79026235/225511261-a05a6996-bacc-4015-b6ad-f5b15c6d3758.png)
+![image](https://github.com/LesFerch/WinSetView/assets/79026235/a2bec3ac-5742-493e-a958-3da2ff4c4c07)
 
 WinSetView...
 
@@ -30,5 +30,5 @@ WinSetView will **correct** the following conditions (when the cause is registry
 
 **Note**: **Windows 11** currently has some folder view bugs in regards to setting folder type for entire folder trees on removable drives and overriding the automatically detected folder type on "Local disks". WinSetView provides an option to use the Windows 10 Explorer on Windows 11 to avoid those bugs.
 
-![image](https://user-images.githubusercontent.com/79026235/152913587-d294de81-c8ca-428d-b351-09a564854eff.png)
+![image](https://github.com/LesFerch/WinSetView/assets/79026235/41afd0e5-72c9-40e3-a1a0-fbb4dc591de9)
 [See the quick start guide](./README.md)

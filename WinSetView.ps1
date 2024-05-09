@@ -172,6 +172,14 @@ $UseLight = (Get-ItemProperty -Path $Key -Name $Value  -ErrorAction SilentlyCont
 $DarkMode = $false
 If (($UseLight -is [int]) -And ($UseLight -eq 0)) { $DarkMode = $true }
 
+$CustomPropertyPrefixes = 'Icaros'
+
+Function AdjustPrefix($String) {
+  ForEach ($Prefix in $CustomPropertyPrefixes) {
+    $String = $String.Replace("System.$Prefix.","$Prefix.")
+  }
+  Return $String
+}
 
 Function ResetThumbCache {
   $ThumbCacheFiles = "$Env:LocalAppData\Microsoft\Windows\Explorer\thumbcache_*.db"
@@ -252,6 +260,7 @@ Else {
   $UnhideAppData = [Int]$iniContent['Options']['UnhideAppData']
   $ClassicSearch = [Int]$iniContent['Options']['ClassicSearch']
   $HomeGrouping = [Int]$iniContent['Options']['HomeGrouping']
+  $LibraryGrouping = [Int]$iniContent['Options']['LibraryGrouping']
   $SearchOnly = [Int]$iniContent['Options']['SearchOnly']
   $SetVirtualFolders = [Int]$iniContent['Options']['SetVirtualFolders']
   $ThisPCoption = [Int]$iniContent['Options']['ThisPCoption']
@@ -663,7 +672,12 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
         $GroupBy = 'Home.Grouping'
         $GroupByOrder = '+'
       }
+      If (($FT.IndexOf('Library') -gt 0) -And ($LibraryGrouping -eq 0)) {
+        $GroupBy = 'ItemSearchLocation'
+        $GroupByOrder = '+'
+      }
       If ($GroupBy -ne '') {$GroupBy = "System.$GroupBy"}
+      $GroupBy = AdjustPrefix($GroupBy)
       If ($GroupByOrder -eq '+') {$GroupByOrder = 1} Else {$GroupByOrder = 0}
 
       #Code added June 2023 to disable Sort 4
@@ -674,6 +688,7 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
       $SortBy = 'prop:' + $SortBy
       $SortBy = $SortBy -Replace '\+','+System.'
       $SortBy = $SortBy -Replace '-','-System.'
+      $SortBy = AdjustPrefix($SortBy)
 
       $CustomIconSize = $iniContent[$FT]['IconSize']
       If ($CustomIconSize -ne '') {$IconSize = $CustomIconSize}
@@ -688,6 +703,7 @@ Get-ChildItem $FolderTypes | Get-ItemProperty | ForEach {
           $Show = $ArrColumnListItem[0]
           $Width = ''; If ($ArrColumnListItem[1] -ne '') {$Width = '(' + $ArrColumnListItem[1] + ')'}
           $Property = 'System.' + $ArrColumnListItem[2]
+          $Property = AdjustPrefix($Property)
           $ColumnList =  "$ColumnList$Show$Width$Property;"
         }
       }

@@ -1,3 +1,15 @@
+## 2.96
+
+Enhancement: Added all of the available [Icaros](https://github.com/Xanashi/Icaros) property translations.
+
+## 2.95
+
+Feature added: If [Icaros](https://github.com/Xanashi/Icaros) Properties are activated, those properties will be available to use from the WinSetView Columns page.
+
+## 2.94
+
+Enhancement: Libraries now automatically get the usual headers that show the path and drive. The Option menu provides an override for the automatic grouping.
+
 ## 2.93
 
 Bug fix: Windows 10 Explorer on Windows 11 now remembers its window size and position.
