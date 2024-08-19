@@ -12,7 +12,7 @@ This is the quick start guide. For more details, please see the [complete user m
 
 Compatible with Windows 7, 8, 10, and 11.
 
-[Version 2.96](./VersionHistory.md)
+[Version 2.99](./VersionHistory.md)
 
 ## Summary
 
@@ -36,7 +36,7 @@ For more details, please see the [extended summary](./README-more.md).
 
 Simple step by step instructions follow.
 
-**Note**: Nothing in Windows is changed, and no settings are saved, until the **Submit** button is pressed. Feel free to experiment with the WinSetView interface and just **X** out and restart the app to get back to where you started. Display options such as **font**, **font size**, and **theme** are also saved to the INI file and are therefore also only saved when you click **Submit**. Only the WinSetView window size and position are saved automatically when you click **X** to exit the app.
+**Note**: Nothing in Windows is changed, and no settings are saved, until the **Submit** button is pressed. Feel free to experiment with the WinSetView interface and just **X** out and restart the app to get back to where you started. Display options such as **font**, **font size**, and **theme** are saved to the INI file and are therefore only saved when you click **Submit**. Only the WinSetView window size and position are saved automatically when you click **X** to exit the app.
 
 **Note**: For best results, close all open applications before running WinSetView. Open applications can prevent open/save dialog views from being updated. Apps that minimize to the System Tray when "closed", such as Discord, Steam, and qBittorrent, must be fully closed (e.g. right-click the app's System Tray icon and select `Exit`).
 
@@ -93,7 +93,7 @@ For any folder type (e.g. **Pictures**) that you wish to have a *different* defa
 
 Click The **Options** button.
 
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/5b99d061-124d-4f10-a840-cdf55b208638)
+![image](https://github.com/user-attachments/assets/bacda1ed-300b-44c0-8e47-fa778cebf093)
 
 Review the settings on that page and adjust as desired. See the [manual](./Manual.md#options-menu) for full details. Options with a shield icon require Administrative access and will automatically pop up a UAC prompt if changed.
 
@@ -105,7 +105,7 @@ Once you're happy with your selections, make those settings apply to Windows Fil
 
 You can always run WinSetView again to change any settings and you can revert back to a previous state using the **Restore** button. You also have the option of setting File Explorer back to Windows defaults by checking **Reset Views to Windows Defaults** and then clicking **Submit**.
 
-**Note**: If you use the **Reset Views to Windows Defaults** feature, be sure to check the settings under **Options**.
+**IMPORTANT**: Using **Restore** or **Reset Views to Windows Defaults** only resets folder views. Many of the settings under **Options** are separate from the folder view settings. Please ensure those options are set to what you want.
 
 ![image](https://github.com/LesFerch/WinSetView/assets/79026235/50c53943-f673-49da-ad3f-419026deea96)
 [See the complete user manual](./Manual.md)

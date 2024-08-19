@@ -17,9 +17,9 @@ This is the complete user manual. See the link below for the quick start guide.
 Compatible with Windows 7, 8, 10, and 11.
 
 Les Ferch, lesferch@gmail.com\
-GitHub repository created 2021-03-26, last updated 2024-04-08
+GitHub repository created 2021-03-26, last updated 2024-07-28
 
-[Version 2.96](./VersionHistory.md)
+[Version 2.99](./VersionHistory.md)
 
 ## Summary
 
@@ -44,7 +44,7 @@ All changes made by WinSetView are per-user within the HKEY_CURRENT_USER hive in
 
 **Note**: For Windows 7 and 8, some of the icons used in the program will differ from Windows 10 and 11 due to issues with those older Windows versions being able to display all Unicode characters.
 
-**Note**: Nothing in Windows is changed, and no settings are saved, until the **Submit** button is pressed. Feel free to experiment with the WinSetView interface and just **X** out and restart the app to get back to where you started. Display options such as **font**, **font size**, and **theme** are also saved to the INI file and are therefore also only saved when you click **Submit**. Only the WinSetView window size and position are saved automatically when you click **X** to exit the app.
+**Note**: Nothing in Windows is changed, and no settings are saved, until the **Submit** button is pressed. Feel free to experiment with the WinSetView interface and just **X** out and restart the app to get back to where you started. Display options such as **font**, **font size**, and **theme** are saved to the INI file and are therefore only saved when you click **Submit**. Only the WinSetView window size and position are saved automatically when you click **X** to exit the app.
 
 ## Buttons and Controls in the Header
 
@@ -107,6 +107,8 @@ Open the **Options** menu. See the *Options* section for details.
 Select and restore a backup file to return Explorer views to a previous state.
 
 This button will appear after first run (i.e. after **Submit** has been clicked). Each time you click **Submit**, the PowerShell script makes a backup of the user's Explorer view registry keys to a date-time-named file. The **Restore** button will bring up a dialog to let you pick a backup file to restore. Since it's a standard file dialog, you can use the same interface to delete any unwanted backups by selecting them and right-clicking to get a *Delete* option.
+
+**IMPORTANT**: Many of the items shown in the **Options** page, are not affected by the Restore feature. Be sure to check the items in the Options page and set them to your desired settings. Specifically, the items up to and including "Set a start folder for Explorer" are not affected by Restore.
 
 ### Load Settings
 
@@ -271,7 +273,7 @@ This folder type controls the view you see for the *Searches* item within your u
 
 ### Options Menu
 
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/5b99d061-124d-4f10-a840-cdf55b208638)
+![image](https://github.com/user-attachments/assets/bacda1ed-300b-44c0-8e47-fa778cebf093)
 
 
 ![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896) **Note**: All options, except those with a shield icon, can be changed by a Standard user. The items with the shield icon require Administrator rights to change. A UAC prompt will appear after clicking **Submit** if one or more of those options are being changed.
@@ -287,9 +289,19 @@ By default, Windows hides file extensions for known file types. This is generall
 By default, Windows 11 spreads out items in list, details, and small icons views. This makes it easier to select items using a touch interface, at the expense of less information in the same space. Enabling *compact view* sets the spacing back to the tighter spacing used in Windows 10.
 
 
+#### Show Hidden Files and Folders
+
+When checked, hidden files and folders will be displayed in Explorer. This option affects the Explorer "Hidden files and folders" setting. It has no effect on the "Hide protected operating system files" setting.
+
+
 #### Classic context menu in Windows 11
 
 When checked, the registry setting that restores the Windows 10 style context (right-click) menu will be applied.
+
+
+#### Enable Copy/Move To folder in the context menu
+
+When checked, the items "Copy To folder..." and "Move To folder..." are enabled in the classic context menu.
 
 
 #### No Internet in Windows search
@@ -376,6 +388,8 @@ Why this option, which should be available to any user to toggle as needed, is l
 
 In late 2023, Microsoft pushed out an "update" that reverted Windows 10 back to the "classic" search of Windows 10 build 1903 and earlier. If you like the classic search, then you can leave this option alone. If you prefer the "new" search that Windows 10 had from 2019 to 2023, check this box to enable that feature.
 
+This option has no effect on Windows 11.
+
 
 #### Enable Classic Search in Windows 10
 
@@ -386,13 +400,7 @@ This option is only available when feature 18755234 is enabled. Once feature 187
 
 #### Disable feature 40729001 (Windows 11 Explorer) ![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896)
 
-**Note**: As of Windows 11 build revision 3085 (KB5034204) this option no longer has any effect and will only be shown if you are running an older build.
-
-The new, App SDK based, version of Explorer in Windows 11 has many shortcomings. Among them, no support for drag and drop to folders via the address bar and no direct editing of metadata in the Details pane. It also has some annoying quirks like trimming trailing spaces in the search bar if you pause too long. You can get back the previous Explorer, that does not have those issues, by disabling feature 40729001.
-
-**Note**: Going back to the previous Explorer means giving up full tab support (i.e. no tear or join tabs). Also note that the option "Also apply this template to all subfolders" is broken in both old and new Explorers. You have to go back to the Windows 10 Explorer to get that functionality.
-
-**Note**: Explorer will change after the next RESTART.
+As of Windows 11 22H2 build revision 3085 (KB5034204) this option no longer has any effect and will only be shown if you are running an older build. If you are running an older build, this option disables the new App SDK Explorer.
 
 
 #### Fix Desktop place in legacy dialogs ![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896)
@@ -461,6 +469,8 @@ Please note that this option causes all virtual folders, that share the General 
 
 WinSetView provides an option to set a specific view for **This PC** so that it's not affected by this setting. Unfortunately, it's not practical to provide options to set specific views for all special folders, that share the General Items GUID, as they cannot be set discreetly (i.e. it requires capturing many permutations of binary settings).
 
+As of version 2.97, this option is set to *unchecked* by default since the change in view for folders such as **Fonts** would catch some users by surprise.
+
 
 #### Set view for "This PC"
 
@@ -508,7 +518,13 @@ When this option is checked, Libraries will be grouped by whatever you set, incl
 
 Clicking the **Columns** button brings up the column (properties) selection page for the current folder type. Column headings, in Explorer Details view, correspond to file and folder *properties*.
 
-The items displayed include all system properties. Also, as of version 2.95, the seven [Icaros](https://github.com/Xanashi/Icaros) media properties will be shown at the end of the list if the Icaros property handler is installed (which may come via a "codec pack"). The Icaros properties will be shown in the current language if a translation exists, otherwise English will be shown.
+The items displayed include all system properties that exist on all Windows computers.
+
+As of version 2.95, the seven [Icaros](https://github.com/Xanashi/Icaros) media properties will be shown at the end of the list if the Icaros property handler is installed (which may come via a "codec pack"). The Icaros properties will be shown in the current language if a translation exists, otherwise English will be shown.
+
+These System and Icaros properties are read from files in the **Languages** folder.
+
+As of version 2.97, all remaining shell properties, provided by third-party apps, are imported to the **Columns** list when WinSetView starts. These properties are labelled using the current system language. Changing the language in WinSetView will not change the display language of these additional properties.
 
 The top left of the page includes the same **Help** and **Re-center** buttons that are found on the main page. This is followed by the column re-order button **⮀** and then the name of the currently selected folder type (or *Global*). 
 
@@ -526,7 +542,7 @@ The column order can also be set by removing each column heading and then adding
 
 The issue with software that uses the "legacy" type dialogs (such as IrfanView) is that those type of dialogs assume that **Name** is always the first column. So, for example, if **Size** is set as the first column, and you are in any view other than **Details**, you will just see a bunch of icons with sizes and no names.
 
-Below the column heading line is a scrollable table that includes of all the Details view column headings that can be selected in Explorer (over 300 on Windows 10 and 11). These items are shown in the language of your choice, exactly as they appear in Explorer. Hovering the mouse over any name will show its internal Windows property name.¹
+Below the column heading line is a scrollable table that includes all of the Details view column headings that can be selected in Explorer (over 300 on Windows 10 and 11). These items are shown in the language of your choice, exactly as they appear in Explorer. Hovering the mouse over any name will show its internal Windows property name.¹
 
 The top row of the table consists of a fixed row of buttons for selecting **Group by**, **Sort by**, **Width**, **Display**, and **Right-click** options. Hovering the mouse over any heading button reveals the button's description. The function of each of these buttons is described below.
 
@@ -624,6 +640,8 @@ Note: The **File extension** column heading is not available on Windows 7.
 In addition to the two main files: **WinSetView.exe** (HTML application), and **WinSetView.ps1** (PowerShell command line script) the following folders and files are included:
 
 ### AppData Folder
+
+As of version 2.97, the **AppData** folder is dynamically created from the **Defaults** folder. If an **AppData** folder already exists, only missing files are copied from **Defaults**. This allows a new version of the WinSetView folder to be copied over an old version without risk of overwriting existing user's WinSetView settings.
 
 This folder contains INI files which hold the options selected with the WinSetView interface. Due to the folder type and column heading (property) lists differing among Windows versions, there are separate INI files for Windows 7, 8, and 10. Windows 11 uses the same settings file as Windows 10.
 
