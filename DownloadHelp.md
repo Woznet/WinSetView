@@ -11,43 +11,49 @@ Follow the steps below to download, extract, and run WinSetView for the first ti
 
 ## Step 1: Click the WinSetView Download Link
 
-[![image](https://github.com/LesFerch/WinSetView/assets/79026235/0188480f-ca53-45d5-b9ff-daafff32869e)Download the zip file](https://github.com/LesFerch/WinSetView/archive/refs/heads/main.zip)
+[![image](https://github.com/LesFerch/WinSetView/assets/79026235/0188480f-ca53-45d5-b9ff-daafff32869e)Download the zip file](https://github.com/LesFerch/WinSetView/releases/download/2.99.1/WinSetView.zip)
 
 ## Step 2: Open the Folder Containing the Zip File
 
 This can be done directly from the browser, but will look different for every browser. For example...
 
 **Edge**:\
-![image](https://user-images.githubusercontent.com/79026235/153105994-4ae67c3f-bd51-48b7-88c3-f8adf81591c8.png)
+![image](https://github.com/user-attachments/assets/88d74121-81e4-439b-b989-7d49a4a7ce67)
 
 **Chrome**:\
-![image](https://user-images.githubusercontent.com/79026235/153104134-7494fbbb-c169-493d-b811-1cc5d7da5c00.png)
+![image](https://github.com/user-attachments/assets/f17d7b14-afce-4074-a9c6-ced059d7e68e)
+
 
 Alternatively, you can open the folder (usually the **Downloads** folder) using Windows File Explorer.
 
 ## Step 3: Extract the Entire Zip File
 
-Right-click the downloaded zip file and select **Extract All...**.
+Right-click the downloaded zip file and select **Extract All...**
 
-**Note**: If you have a third-party unzip tool installed (such as 7-Zip, Bandizip, WinZip, WinRAR, etc.) then you may see different unzip options when you right-click the zip file. Any option that unzips the file will do. If there is something like a "smart unzip" option, that is usually the best choice, and won't require editing the unzip path, as indicated below.
+**Note**: If you have a third-party unzip tool installed (such as 7-Zip, Bandizip, WinZip, WinRAR, etc.) then you may see different unzip options when you right-click the zip file. Any option that unzips the file will do. Something like "smart unzip" is usually the best choice.
 
-![02](https://user-images.githubusercontent.com/79026235/153107248-5f0ccc0b-ca21-4102-8492-1df02129f978.png)
+![image](https://github.com/user-attachments/assets/d2f87465-745a-4f69-a58e-1fdbb3f8aada)
 
-Edit the displayed folder path to remove the **WinSetView-main** part and then click **Extract**.
+Then just click **Extract**:
 
-![image](https://user-images.githubusercontent.com/79026235/153104464-b64a9efb-181a-468a-a457-63455f490f32.png)
+![image](https://github.com/user-attachments/assets/5d3a4773-bfa6-4366-95fa-9a0581dd9858)
 
-Once the extraction is complete, you should have a **WinSetView-main** folder. You can now delete the **WinSetView-main.zip** file.
-
-**Note**: If you leave the path as is, you will end up with nested **WinSetView-main** folders, but it will still work just fine.
-
-**Note**: If you downloaded using the GitHub release link, **main** will be replaced with a version number, but everything else is the same.
+Once the extraction is complete, you should have a **WinSetView** folder. You can now delete the **WinSetView.zip** file.
 
 ## Step 3: Open the App
 
-Open the extracted folder and you should see **WinSetView.exe**. If you do not see the **exe** file extension, check **File name extensions** in the Windows File Explorer **View** menu.
+Open the extracted folder and you should see **WinSetView.exe**. If you do not see the **exe** file extension, please enable the option to show file extensions...
 
-![image](https://user-images.githubusercontent.com/79026235/229966497-b357c88d-45fa-4a5d-993e-661b8d18ead4.png)
+Windows 10:
+
+![image](https://github.com/user-attachments/assets/9d7674b1-8335-4eb4-8fe8-c40b50f1a815)
+
+Windows 11:
+
+![image](https://github.com/user-attachments/assets/06c6cffb-9b08-4e75-83da-92fc26e5a1dd)
+
+
+
 
 To avoid annoying "unrecognized app" notifications, right-click **WinSetView.exe** and select **Properties**:
 
@@ -77,9 +83,13 @@ The following error will be displayed if VBScript has been disabled or uninstall
 
 ![image](https://github.com/LesFerch/WinSetView/assets/79026235/a11c3e97-670f-4f09-8b4a-7b656cb3849b)
 
-If the above error is displayed, you will need to undo whatever change was made to disable VBScript on your computer. If your computer is managed by an IT department, it's possible that VBScript has been intentionally disabled, in which case, please see the [Command Line Operation](https://lesferch.github.io/WinSetView/Manual.html#command-line-operation) section in the manual.
+If the above error is displayed and you're running **Windows 11**, please check **Settings**, **System**, **Optional features**, **View features**, and then scroll down and see if there is a **VBScript** item. If so, check it and click **Next** and then **Install**.
 
-If the above error is displayed and you are running **Windows 11**, please check **Settings**, **System**, **Optional features**, **View features**, and then scroll down and see if there is a **VBScript** item. If so, check it and click **Next** and then **Install**.
+If your computer is managed by an IT department, it's possible that VBScript has been intentionally disabled. Or you may have intentionally disabled VBScript yourself. In either case, you can use the new JScript version of WinSetView instead.
+
+The next release of WinSetView will use JScript code instead of VBScript code. That new version is available now as a beta. Please see the [Releases](https://github.com/LesFerch/WinSetView/releases) page to download it.
+
+
 
 ## How to Use
 

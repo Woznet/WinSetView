@@ -6,8 +6,6 @@ You can also manually navigate your browser to: https://lesferch.github.io/WinSe
 
 This is the complete user manual. See the link below for the quick start guide.
 
-[![image](https://github.com/LesFerch/WinSetView/assets/79026235/0188480f-ca53-45d5-b9ff-daafff32869e)Download the zip file](https://github.com/LesFerch/WinSetView/archive/refs/heads/main.zip)
-
 ![image](https://github.com/LesFerch/WinSetView/assets/79026235/41afd0e5-72c9-40e3-a1a0-fbb4dc591de9)
 [See the quick start guide](./README.md)
 
@@ -16,10 +14,9 @@ This is the complete user manual. See the link below for the quick start guide.
 
 Compatible with Windows 7, 8, 10, and 11.
 
-Les Ferch, lesferch@gmail.com\
-GitHub repository created 2021-03-26, last updated 2024-07-28
+Les Ferch, lesferch@gmail.com, 2021 - 2024
 
-[Version 2.99](./VersionHistory.md)
+[Version 3.0.1](./VersionHistory.md)
 
 ## Summary
 
@@ -35,12 +32,12 @@ Each option, and related Explorer background information, is detailed below, but
 
 **IMPORTANT**: For best results, close all open applications before running WinSetView. Open applications can prevent open/save dialog views from being updated. Please note that some apps, such as Discord, Steam, and qBittorrent, don't actually close when you click the close box. Instead, they minimize to the System Tray. They're still running and that can prevent the file open/save dialog view from being updated. Fully exit the app (usually by right-clicking the icon in the System Tray and selecting `Exit`) to ensure that the file open/save dialog view will get updated.
 
-All changes made by WinSetView are per-user within the HKEY_CURRENT_USER hive in the registry. No machine settings are touched and no elevated privileges are required (except as noted for a few optional settings). On each run, WinSetView makes a unique backup file of the affected folder view registry values. A restore option is provided allowing you to rollback to any of those backups. Please note that the backup does not include items shown on the **Options** page.
+All changes made by WinSetView are per-user within the HKEY_CURRENT_USER hive in the registry. No machine settings are touched and no elevated privileges are required (except as noted for a few optional settings). On each run, if **Backup** is checked, WinSetView makes a unique backup file of the affected folder view registry values. A restore option is provided allowing you to rollback to any of those backups. Please note that the backup does not include all items shown on the **Explorer Options** page.
 
 **Note**: For USB-connected phones and tablets, WinSetView provides an option to have them displayed in the same view as generic (General Items) folders (e.g. Details view), but it cannot control the Details view column headings for such devices.
 
 ## Interface
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/a2bec3ac-5742-493e-a958-3da2ff4c4c07)
+![image](https://github.com/user-attachments/assets/7fb20483-f582-4403-98b4-0778645f1553)
 
 **Note**: For Windows 7 and 8, some of the icons used in the program will differ from Windows 10 and 11 due to issues with those older Windows versions being able to display all Unicode characters.
 
@@ -86,31 +83,41 @@ Select a light or dark theme for the WinSetView display. Theme definitions are l
 
 When checked, and applied via **Submit**, this option clears the registry keys that hold Explorer views and restarts Explorer, causing all folder views to revert to Windows defaults. To use this option, check the box and then click **Submit**.
 
-**Note**: Any items in the **Options** screen are still applied when resetting to defaults. Be sure to check and set those options as desired.
+**Note**: This feature does NOT reset the **Explorer Options** items to Windows defaults. Those settings will be applied, as currently selected, if **Reset Explorer options** is checked in the **Submit** dialog.
+
+### Backup
+
+If this box is checked, a REG file backup will be made of your current folder views plus any Explorer options that are listed in Explorer's Folder Options View tab.
 
 ### Submit
 
-Execute the PowerShell script to apply the selected options to the registry and restart Explorer. Do not click Submit when Explorer is busy copying/moving/deleting files.
+This will open a dalog where you can choose to **Clear folder views and set new defaults** and/or **Reset Explorer options**. 
 
-When **Submit** is clicked, the current selections in WinSetView are saved to an INI file (Win10.ini on Windows 10 and 11) and that INI file name is passed to WinSetView.ps1.
+When **OK** is clicked, the current selections in WinSetView are saved to an INI file (Win10.ini on Windows 10 and 11) which is then passed to the **WinSetView.ps1** PowerShell script. That script will apply the selected options and restart Explorer.
 
-Hold down the **Alt** key when clicking **Submit** to keep the PowerShell console open after completion of the script. This is useful for debugging if any errors appear in the PowerShell console window.
+**Important**: Do not click OK when Explorer is busy copying/moving/deleting files.
+
+Hold down the **Alt** key when clicking **OK** to keep the PowerShell console open after completion of the script. This is useful for debugging if any errors appear in the PowerShell console window.
 
 See the **Background** section for details on how Explorer view settings work and how this script sets Explorer view default values.
 
-### Options
+### Folder View Options
 
-Open the **Options** menu. See the *Options* section for details.
+Open the **Folder View Options** page. See the *Folder view Options* section for details.
+
+### Explorer Options
+
+Open the **Explorer Options** page. See the *Explorer Options* section for details.
 
 ### Restore
 
-Select and restore a backup file to return Explorer views to a previous state.
+Select a backup file to return Explorer views to a previous state.
 
-This button will appear after first run (i.e. after **Submit** has been clicked). Each time you click **Submit**, the PowerShell script makes a backup of the user's Explorer view registry keys to a date-time-named file. The **Restore** button will bring up a dialog to let you pick a backup file to restore. Since it's a standard file dialog, you can use the same interface to delete any unwanted backups by selecting them and right-clicking to get a *Delete* option.
+This button will appear after the first run (i.e. after **Submit** and **OK** has been clicked) with the **Backup** option checked. The **Restore** button will bring up a dialog to let you pick a backup file to restore. Since it's a standard file dialog, you can use the same interface to delete any unwanted backups by selecting them and right-clicking to get a *Delete* option.
 
-**IMPORTANT**: Many of the items shown in the **Options** page, are not affected by the Restore feature. Be sure to check the items in the Options page and set them to your desired settings. Specifically, the items up to and including "Set a start folder for Explorer" are not affected by Restore.
+**IMPORTANT**: The primary purpose of the WinSetView backup and restore is to allow reverting back to a previous state of Explorer folder views. Restore can only revert items shown in WinSetView's **Explorer Options** page that correspond to Explorer's Folder Options **View** tab.
 
-### Load Settings
+### Load Settings (📄)
 
 (Advanced interface)
 
@@ -118,7 +125,7 @@ For *technical users*, who wish to maintain multiple configurations, the **Load 
 
 This button does NOT load your current Windows settings. It's of no interest to most users!
 
-### Save Settings
+### Save Settings (📝)
 
 (Advanced interface)
 
@@ -155,9 +162,9 @@ You can group by any property in ascending or descending order, or turn off grou
 
 The **⚙ (Options)** button allows you to select a _different_ view for File Open/Save dialogs. For example, if you have set **List** as your default view, but want **Details** in File Open/Save dialogs, this is where you would set that up.
 
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/7f684ac7-2be2-4384-907a-0e4a77d15891)
+![image](https://github.com/user-attachments/assets/3cb61fc7-790d-4cd1-92c8-b6bd07369aec)
 
-Separate File Dialog views can be set under Global as well as under any specific folder type. This is an improvement over previous versions of WinSetView that only had one global File Dialog view settings in the Options menu.
+Separate File Dialog views can be set under Global as well as under any specific folder type.
 
 Note that there is no need to set this option if you want Open/Save dialogs to have the same view you have already set for File Explorer.
 
@@ -271,12 +278,112 @@ This folder type controls the view of results you see when you *search* your use
 
 This folder type controls the view you see for the *Searches* item within your user folder.
 
-### Options Menu
+### Options menu
 
-![image](https://github.com/user-attachments/assets/bacda1ed-300b-44c0-8e47-fa778cebf093)
+As of version 3, the options are divided into **Folder View Options** and **Explorer Options**.
 
 
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896) **Note**: All options, except those with a shield icon, can be changed by a Standard user. The items with the shield icon require Administrator rights to change. A UAC prompt will appear after clicking **Submit** if one or more of those options are being changed.
+### Folder View Options
+
+![image](https://github.com/user-attachments/assets/41191e79-b484-4443-8ba0-6cd31a037c84)
+
+#### Show paths in search results only
+
+When this option is checked, path and folder name column headings in Details view are only shown in search results. Such headings are shown in *blue* within WinSetView. The following column headings are affected by this setting:
+
+**Folder path** or **File location** (ItemFolderPathDisplay): Full path to the folder. Example: C:\Movies\Ghibli\
+**Folder** (ItemFolderPathDisplayNarrow): Folder name followed by preceding path. Example: Ghibli (C:\Movies)\
+**Path** (ItemPathDisplay): Full path to the file. Example: C:\Movies\Ghibli\Ponyo.mkv\
+**Folder name** (ItemFolderNameDisplay): The folder name only. Example: Ghibli
+
+Tip: Select your preferred search result path column first and then select other headings, such as Date modified and Size. That way, when you do a search, the path of all matches will be visible without having to make the window larger.
+
+Note: The path column will not appear when you search the Downloads folder because the Downloads folder type does not have an associated search results folder type.
+
+Note: The *Relevance* column heading (*Search.Rank* property) is *only* shown in search results and is therefore always blue in WinSetView, regardless of this setting.
+
+
+#### Legacy row and icon spacing
+
+**Note**: This option will not appear if your computer is in dark mode, as it is not compatible (text will be black). If you previously enabled this option while in light mode, clicking Submit in WinSetView will automatically clear this setting so that you will be returned to light text on a dark background.
+
+When this option is enabled, Explorer will use the Windows XP/Vista style view modes. Rows in List and Details views are closer together, icon row spacing is not affected by long filenames, and file names in icon views only wrap on certain characters, such as spaces and hyphens.
+
+Tiles and Content view behave in odd ways when this option is enabled. You may see one view upon setting the view and then a different view after closing and re-opening the folder. Note that Content view did not exist in Windows Vista and its Tile mode was different than the modern Tiles view, so the odd results are not too surprising.
+
+When this feature is enabled, selected files in Explorer remain selected after changing the sort order, just as they did in Windows XP/Vista.
+
+Also, when this option is enabled, you can freely rearrange files and folders in Details and Icon views, but those arrangements will be forgotten when the folder is closed, unless you are running Windows 7, Windows 8.x, or a Windows 10 build that is lower than 1703.
+
+If you want this feature with dark mode, that can be done by using the program [QTTabBar](http://qttabbar.wikidot.com/). Select the "beta" download.
+
+
+#### Disable full row select
+
+When this option is checked, only the file name is highlighted in Details view, instead of the whole row.
+
+This option only appears when **Legacy row and icon spacing** is checked because the folder flags that enable the legacy spacing are required to disable full row select.
+
+
+#### Use General Items view for connected devices
+
+Connected devices, such as phones and tablets, normally open in **Tiles** view with no option to easily change the view. The **Apply to folders** option is grayed out (or available but does nothing) for such devices, requiring view changes to be done folder by folder. Enabling the **Use General Items view for connected devices** option causes such devices to open in the same view that has been set for **General Items**.
+
+Only the view mode (e.g. List, Details, etc.) applies to the connected device. There is a separate set of column headings for such devices and no documented method to change the defaults.
+
+Please note that this option causes all virtual folders, that share the General Items GUID, such as **Devices and Printers** and **Fonts**, to be displayed with the same view as **General Items**. So, for example, if you enable this option and have your **General Items** view set to **Details**, those other special folders will also be displayed in Details view.
+
+WinSetView provides an option to set a specific view for **This PC** so that it's not affected by this setting. Unfortunately, it's not practical to provide options to set specific views for all special folders, that share the General Items GUID, as they cannot be set discreetly (i.e. it requires capturing many permutations of binary settings).
+
+As of version 2.97, this option is set to *unchecked* by default since the change in view for folders such as **Fonts** would catch some users by surprise.
+
+
+#### Make All Folders Generic
+
+This option sets a registry value that tells Explorer to make all folders to be type *Generic* (i.e. *General Items*).
+
+This makes the **Documents**, **Music**, **Pictures**, and **Videos** folders generic. Those folders will retain their special icons, but they will otherwise be generic (e.g. column headings in Details view will be the same as *General Items*). This option has no effect on the **Downloads** folder.
+
+Please note that, even with this setting enabled, you can still change any folders to type **Documents**, **Music**, **Pictures**, or **Videos** using Explorer's **Customize this folder...** option. Any default views, you may have set for these folder types in WinSetView, would then apply.
+
+Checking this option also causes **Folder Type Discovery** to be disabled. That's the windows feature that automatically changes a folder's type based on its contents. If you want your folder views to change with content, don't check this item. If you want a consistent view across all folders, regardless of content, you *may* want to check this option.
+
+Please note there is no separate setting for **Folder Type Discovery**. If you want Folder Type Discovery *off*, you must make all folders generic. However, as noted above, you can change any folder (or tree of folders) back to a specific folder type at any time.
+
+**Note**: Enabling this option will make the Home / Quick access view the same as "General items" if you're running the Windows 10 Explorer or the pre-App SDK Explorer in Windows 11. For the App SDK Explorer in Windows 11 (i.e. the latest Explorer), it will cause the Home view to lose its headings (i.e. it will not be grouped). Therefore, the WinSetVow option "Do not force standard grouping on Home / Quick Access" has no effect when "Make All Folders Generic" is enabled.
+
+
+#### Do not force standard grouping on Home / Quick Access
+
+When this option is unchecked (default), Home / Quick Access will be grouped by "Group". That is, the folder will have headings for pinned items, recent files, and recent folders.
+
+When this option is checked, Home / Quick Access will be grouped by whatever you set, including (None).
+
+
+#### Do not force standard grouping on Libraries
+
+When this option is unchecked (default), Libraries will be grouped by "By Location". That is, you will get the default two-line header that shows the folder name and path.
+
+**Note**: This was always possible by setting "Group by" for each library to "By Location". That step is no longer required.
+
+When this option is checked, Libraries will be grouped by whatever you set, including (None).
+
+
+#### Set view for "This PC"
+
+If this option is checked, *This PC* will be set to the view selected.
+
+If this option is unchecked, this virtual folder will retain its Windows default of *Tiles* and group by *Type*, unless **Use General Items view for connected devices** is selected, in which case, "This PC" will be in General Items view.
+
+**Note**: Because **This PC** does not have its own GUID, this option creates registry values (in the BagMRU/Bags keys) that would be the same as if you manually browsed to this folder and set the view. These settings are prone to returning to Windows defaults (see *Apply to Folders "Bug"* below).
+
+
+### Explorer Options
+
+![image](https://github.com/user-attachments/assets/21ce83f8-f34f-4ab6-9eeb-263edec9b86f)
+
+
+![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896) **Note**: All options, except those with a shield icon, can be changed by a Standard user. The items with the shield icon require Administrator rights to change. A UAC prompt will appear after clicking **Submit** and **OK** if one or more of those options are being changed.
 
 
 #### Show File Extensions
@@ -381,8 +488,7 @@ As you can see from the examples above, which setting is best depends on how you
 
 Why this option, which should be available to any user to toggle as needed, is locked down as a policy that requires Administrator rights to change, is one of the many mysteries of Windows design.
 
-**Note**: This option works in Windows 10 and Windows 11. In theory, it should also work in Windows 7, but it did not work in my tests on Windows 7.
-
+**Note**: If you've set a secondary sort property, name sorting will use the numeric ordering. Clear the secondary sort to allow non-numeric sorting. You can clear the secondary sort for the current folder simply by clicking the column header of another property such as Date modified. In WinSetView be sure to only set **Sort 1** to ensure you can use non-numeric sorting.
 
 #### Enable feature 18755234 (Windows 10 Search) ![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896)
 
@@ -416,6 +522,11 @@ After:\
 **Note**: With this option enabled on Windows 10, and older Windows 11 builds, the legacy dialog "Quick Access" item will change to "Frequent folders", but will show the same items.
 
 
+### Unhide the Public Desktop folder ![image](https://github.com/LesFerch/WinSetView/assets/79026235/31d5617f-6617-4e14-9b8e-0efb2c2b9896)
+
+When checked, the hidden attribute is removed from the Public Desktop folder. Unchecking the option re-applies the hidden attribute.
+
+
 #### Set a start folder for Explorer
 
 This option allows you to set the start folder for Explorer to "This PC", "Home / Quick Access", "Downloads", or any path you choose. This option works on Windows 10 and Windows 11. It does not work on Windows 7.
@@ -423,93 +534,6 @@ This option allows you to set the start folder for Explorer to "This PC", "Home 
 **Note**: The options "This PC" and "Home / Quick Access" are exactly the same setting you see in Folder Options beside "Open File Explorer to". The "Downloads" option is a minor variation of that setting and will result in a blank beside "Open File Explorer to". Setting any other path using the "Other" option creates a totally different registry entry that uses the "DelegateExecute" feature. That setting is known to not work with the WindHawk "Classic navigation bar" mod.
 
 ![image](https://github.com/LesFerch/WinSetView/assets/79026235/f2090713-8df1-45d1-a358-fb4a08af9a0b)
-
-
-#### Legacy row and icon spacing
-
-**Note**: This option will not appear if your computer is in dark mode, as it is not compatible (text will be black). If you previously enabled this option while in light mode, clicking Submit in WinSetView will automatically clear this setting so that you will be returned to light text on a dark background.
-
-When this option is enabled, Explorer will use the Windows Vista style view modes. Rows in List and Details views are closer together, icon row spacing is not affected by long filenames, and file names in icon views only wrap on certain characters, such as spaces and hyphens.
-
-Tiles and Content view behave in odd ways when this option is enabled. You may see one view upon setting the view and then a different view after closing and re-opening the folder. Note that Content view did not exist in Windows Vista and its Tile mode was different than the modern Tiles view, so the odd results are not too surprising.
-
-Also, when this option is enabled, you can freely rearrange files and folders in Details and Icon views, but those arrangements will be forgotten when the folder is closed, unless you are running Windows 7, Windows 8.x, or a Windows 10 build that is lower than 1703.
-
-
-#### Disable full row select
-
-When this option is checked, only the file name is highlighted in Details view, instead of the whole row.
-
-This option only appears when **Legacy row and icon spacing** is checked because the folder flags that enable the legacy spacing are required to disable full row select.
-
-
-#### Show paths in search results only
-
-When this option is checked, path and folder name column headings in Details view are only shown in search results. Such headings are shown in *blue*. The following column headings are affected by this setting:
-
-**Folder path** or **File location** (ItemFolderPathDisplay): Full path to the folder. Example: C:\Movies\Ghibli\
-**Folder** (ItemFolderPathDisplayNarrow): Folder name followed by preceding path. Example: Ghibli (C:\Movies)\
-**Path** (ItemPathDisplay): Full path to the file. Example: C:\Movies\Ghibli\Ponyo.mkv\
-**Folder name** (ItemFolderNameDisplay): The folder name only. Example: Ghibli
-
-Tip: Select your preferred search result path column first and then select other headings, such as Date modified and Size. That way, when you do a search, the path of all matches will be visible without having to make the window larger.
-
-Note: The path column will not appear when you search the Downloads folder because the Downloads folder type does not have an associated search results folder type.
-
-Note: The *Relevance* column heading (*Search.Rank* property) is *only* shown in search results and is therefore always blue in WinSetView, regardless of this setting.
-
-
-#### Use General Items view for connected devices
-
-Connected devices, such as phones and tablets, normally open in **Tiles** view with no option to easily change the view. The **Apply to folders** option is grayed out (or available but does nothing) for such devices, requiring view changes to be done folder by folder. Enabling the **Use General Items view for connected devices** option causes such devices to open in the same view that has been set for **General Items**.
-
-Only the view mode (e.g. List, Details, etc.) applies to the connected device. There is a separate set of column headings for such devices and no documented method to change the defaults.
-
-Please note that this option causes all virtual folders, that share the General Items GUID, such as **Devices and Printers** and **Fonts**, to be displayed with the same view as **General Items**. So, for example, if you enable this option and have your **General Items** view set to **Details**, those other special folders will also be displayed in Details view.
-
-WinSetView provides an option to set a specific view for **This PC** so that it's not affected by this setting. Unfortunately, it's not practical to provide options to set specific views for all special folders, that share the General Items GUID, as they cannot be set discreetly (i.e. it requires capturing many permutations of binary settings).
-
-As of version 2.97, this option is set to *unchecked* by default since the change in view for folders such as **Fonts** would catch some users by surprise.
-
-
-#### Set view for "This PC"
-
-If this option is checked, *This PC* will be set to the view selected.
-
-If this option is unchecked, this virtual folder will retain its Windows default of *Tiles* and group by *Type*, unless **Use General Items view for connected devices** is selected, in which case, "This PC" will be in General Items view.
-
-**Note**: Because **This PC** does not have its own GUID, this option creates registry values (in the BagMRU/Bags keys) that would be the same as if you manually browsed to this folder and set the view. These settings are prone to returning to Windows defaults (see *Apply to Folders "Bug"* below).
-
-
-#### Make All Folders Generic
-
-This option sets a registry value that tells Explorer to make all folders to be type *Generic* (i.e. *General Items*).
-
-This makes the **Documents**, **Music**, **Pictures**, and **Videos** folders generic. Those folders will retain their special icons, but they will otherwise be generic (e.g. column headings in Details view will be the same as *General Items*). This option has no effect on the **Downloads** folder.
-
-Please note that, even with this setting enabled, you can still change any folders to type **Documents**, **Music**, **Pictures**, or **Videos** using Explorer's **Customize this folder...** option. Any default views, you may have set for these folder types in WinSetView, would then apply.
-
-Checking this option also causes **Folder Type Discovery** to be disabled. That's the windows feature that automatically changes a folder's type based on its contents. If you want your folder views to change with content, don't check this item. If you want a consistent view across all folders, regardless of content, you *may* want to check this option.
-
-Please note there is no separate setting for **Folder Type Discovery**. If you want Folder Type Discovery *off*, you must make all folders generic. However, as noted above, you can change any folder (or tree of folders) back to a specific folder type at any time.
-
-**Note**: Enabling this option will make the Home / Quick access view the same as "General items" if you're running the Windows 10 Explorer or the pre-App SDK Explorer in Windows 11. For the App SDK Explorer in Windows 11 (i.e. the latest Explorer), it will cause the Home view to lose its headings (i.e. it will not be grouped). Therefore, the WinSetVow option "Do not force standard grouping on Home / Quick Access" has no effect when "Make All Folders Generic" is enabled.
-
-
-#### Do not force standard grouping on Home / Quick Access
-
-When this option is unchecked (default), Home / Quick Access will be grouped by "Group". That is, the folder will have headings for pinned items, recent files, and recent folders.
-
-When this option is checked, Home / Quick Access will be grouped by whatever you set, including (None).
-
-
-#### Do not force standard grouping on Libraries
-
-When this option is unchecked (default), Libraries will be grouped by "By Location". That is, you will get the default two-line header that shows the folder name and path.
-
-**Note**: This was always possible by setting "Group by" for each library to "By Location". That step is no longer required.
-
-When this option is checked, Libraries will be grouped by whatever you set, including (None).
 
 
 ### Columns
@@ -534,7 +558,7 @@ Next, the currently selected column headings, that will display in File Explorer
 
 Clicking the column re-order button **⮀** will bring up a dialog that will allow you to rearrange the column headings by dragging them up or down in the presented list.:
 
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/1b6bdc7a-0e75-462b-8ee3-eaa28b0a8ba5)
+![image](https://github.com/user-attachments/assets/b49f13e1-171f-41ef-8697-613845f0bf15)
 
 The column order can also be set by removing each column heading and then adding them back in the desired order, but it is easier to use the re-order dialog. Note that the re-order dialog will allow any order, but will display the following warning if the **Name** property is not the first column:
 
@@ -560,7 +584,9 @@ There are three Sort columns to allow sorting Explorer file/folder views on up t
 
 With a Sort column enabled (ascending or descending), click a radio button beside the property you wish to sort by.
 
-**Note**: Sort 2 and Sort 3 are used to create a multi-level sort. If Sort 1 is set to something unique, such as Name, there is no point in setting a Sort 2 or Sort 3. However, if Sort 1 is set to something non-unique, such as Type, then Sort 2 could be set to something else, such as Date modified or Name to create a two-level sort. A three level sort could be set up for Music folders with something like Artist for Sort 1, Album for Sort 2, and Title for Sort 3.
+**Note**: Sort 2 and Sort 3 are used to create a multi-level sort. If Sort 1 is set to something unique, such as Name, there is no point in setting a Sort 2 or Sort 3 (with one exception noted below). If Sort 1 is set to something non-unique, such as Type, then Sort 2 could be set to something else, such as Date modified or Name to create a two-level sort. A three level sort could be set up for Music folders with something like Artist for Sort 1, Album for Sort 2, and Title for Sort 3.
+
+**Note**: In Explorer, you can force folders to always be a the top by setting the secondary sort to Type and then setting the primary sort to Name. You can do the same thing in WinSetview with Sort 1 and Sort 2. You can even get the same effect by setting both Sort 1 and Sort 2 to use Name. For Sort 2, it does not matter if you choose ascending or descending. But also note that setting a secondary sort will make sorting by name always use the numeric sort order. If you have checked **Disable numerical sort**, be sure that you only set **Sort 1** (Sort 2 and 3 should not be enabled).
 
 **Note**: Prior to WinSetView 2.76 there were four Sort columns, but it has been determined that Windows only supports up to 3 sort levels via the FolderTypes registry key (that's used to set the default folder views) even though it's possible to set four sort levels via the File Explorer GUI by Shift-clicking column headings.
 
@@ -570,7 +596,7 @@ With a Sort column enabled (ascending or descending), click a radio button besid
 This column allows you to set the default width for each property (column heading). For example, you can use this setting to make the Name column wider than the default of 34 ems.
 
 The value is specified in ems. 1 em ≈ 1 char\
-Em size is relative to screen scaling. For example (at 96 dpi):\
+The equivalent number of pixels for 1 Em depends on the screen scaling. For example:\
 1 em at 100% = 8 pixels\
 1 em at 125% = 10 pixels\
 1 em at 150% = 12 pixels\
@@ -580,7 +606,7 @@ Please note that you can set the width as small as 1em, but Explorer will expand
 
 If you wish to enter the column width in *pixels*, hold **Alt** and **click** the input width field you wish to adjust. A dialog will open showing the width in pixels:
 
-![image](https://github.com/LesFerch/WinSetView/assets/79026235/ebf2f3bc-e3c8-423b-8bc0-180737217be3)
+![image](https://github.com/user-attachments/assets/61d77d8d-a81f-4ad7-9a0e-8af0b29338fd)
 
 The pixel value will vary depending on screen pixel density, whereas the value in ems will be constant across different display configurations. Please note that WinSetView sets the column *default* width which can only be set to whole (integer) em values. Windows File Explorer lets you set the width down to the pixel, but that is stored as a setting within the volatile *Bags* registry key *overriding* the default value. WinSetView deals with *default* settings only.
 
@@ -635,6 +661,13 @@ In addition to the path-related properties explained earlier, here are explanati
 
 Note: The **File extension** column heading is not available on Windows 7.
 
+### Search
+
+Press **Ctrl-F** to search for text within any page. This is most useful for finding properties in the **Columns** page. Please note that this function is provided by the MSHTML engine. There is no specific code in WinSetView for the search function, so it cannot be modified or enhanced in any way.
+
+![image](https://github.com/user-attachments/assets/46c81ec1-de69-4f44-b1da-73b23e93d911)
+
+
 ## Files
 
 In addition to the two main files: **WinSetView.exe** (HTML application), and **WinSetView.ps1** (PowerShell command line script) the following folders and files are included:
@@ -653,13 +686,17 @@ Please note, for system administrators setting up *new* user profiles, it may be
 
 ### AppParts Folder
 
-This folder contains files that are used by *WinSetView.exe*.
+This folder contains files that are used by *WinSetView.exe* or *WinSetView.ps1*.
 
 **Fonts.txt** contains a list of fonts to display in the WinSetView font selection menu.
 
 **Themes.ini** contains the WinSetView light and dark themes. This file can be edited to change the existing themes or add new themes.
 
-**ViVeTool.exe** and **Albacore.ViVe.dll** are used to enable or disable certain Windows features shown in the Options menu.
+**ViVeTool.exe** and **Albacore.ViVe.dll** are used to enable or disable certain Windows features shown in the Explorer Options page.
+
+**GetMoreProperties.exe** is used by WinSetView.exe to retrieve the custom properties installed by third-party apps.
+
+**CSReg.exe** replicates most of the functionality of Reg.exe. It's used by WinSetView.ps1 on systems that do not have Reg.exe or block Reg.exe with the DisableRegistryTools policy.
 
 ### Language Folder
 
@@ -677,17 +714,19 @@ PowerShell script for backing up and restoring all Explorer view related setting
 
 For those who prefer to go old school. This does the same thing as WinSetBack.ps1 except that it saves the backup to the desktop instead of the script's directory.
 
-**CaptureCustom.vbs**
+**CaptureCustom.js**
 
-Whereas WinSetBack.ps1 captures ALL Explorer view-related keys, *CaptureCustom.vbs* captures only the *BagMRU*, *Bags*, and *Control Panel* keys to provide a supplemental file for use with WinSetView.
+Whereas WinSetBack.ps1 captures ALL Explorer view-related keys, *CaptureCustom.js* captures only the *BagMRU*, *Bags*, and *Control Panel* keys to provide a supplemental file for use with WinSetView.
 
-This script captures Explorer view settings that can't be set in WinSetView, such as *Recycle Bin* and *Control Panel* views. First run WinSetView to set your desired Explorer default view settings. Next, set Recycle Bin, Control Panel, etc. to your desired views and close those windows. Then run CaptureCustom.vbs. It will export the ControlPanel, BagMRU, and Bags keys to a file named CaptureCustom.reg.
+This script captures Explorer view settings that can't be set in WinSetView, such as *Recycle Bin* and *Control Panel* views. First run WinSetView to set your desired Explorer default view settings. Next, set Recycle Bin, Control Panel, etc. to your desired views and close those windows. Then run CaptureCustom.js. It will export the ControlPanel, BagMRU, and Bags keys to a file named WinSetViewCustom.reg.
 
-Rename CaptureCustom.reg to WinSetViewCustom.reg and place it in the AppData folder to have it applied by WinSetView. WinSetView.ps1 will import the file WinSetViewCustom.reg after all other settings are applied. This will override any settings applied by WinSetView!
+Place WinSetViewCustom.reg in your active WinSetView AppData folder to have it applied by WinSetView. WinSetView.ps1 will import the file WinSetViewCustom.reg after all other settings are applied. This will override any settings applied by WinSetView!
 
 Please, if you don't know what you're doing, avoid this level of customization!
 
-**WinSetView.vbs** A simple launcher for WinSetView.ps1 that may come in handy for system administrators.
+**WinSetView.js**
+
+A simple launcher for WinSetView.ps1 that may come in handy for system administrators.
 
 ## Command Line Operation
 
@@ -743,9 +782,7 @@ The **Customize this folder...** menu item allows you to change the current fold
 
 To use this option, click in a folder's white space, select **Customize this folder...**, select the desired folder type, such as *Pictures*, from the menu, check **Also apply this template to all subfolders** (if you want the change to apply to subfolders), and then click **Apply**. This will change the folder's type and it will then be displayed using the view settings for that folder type.
 
-**Note**: Windows 11 currently has some bugs in regards to the **Customize this folder...** feature. There are issues with both "Local Disks" (such a C:) and "removable" drives, such as flash drives. On "Local Disks", Windows 11 File Explorer aggressively applies automatic folder type discovery making it impossible to override the automatically detected folder type. On removable drives (ones that are NOT "Local Disk") Windows 11 File Explorer will ignore attempts to set an entire folder tree to the folder type of your choice, leaving the folders set to type "General items". You can, usually, set the folder type by setting one folder at a time.
-
-If you need the capability to set the folder type reliably, you may want to consider enabling the option to use the Windows 10 Explorer on Windows 11.
+**Note**: The option **Also apply this template to all subfolders** does not work in the Windows 11 Explorer since the KB5008353 update (build 22000.469) from January 25, 2022. For drive C (or any NTFS formatted drive of type "Local Disk") you can set the folder type for a whole tree using the [SetFolderType](https://lesferch.github.io/SetFolderType/) tool. Otherwise, you may want to consider enabling the option to use the Windows 10 Explorer on Windows 11.
 
 ### General Items (Generic) Folders
 
@@ -802,11 +839,11 @@ No (other than a few optional settings). WinSetView creates a copy of the Window
 
 ### Is there an Undo?
 
-Yes, as described under *Restore* above, WinSetView creates a backup every run that can be restored at any time. You can also revert the Explorer views to Windows defaults at any time. However, be sure to check the **Options** screen and set those options as desired, as they are not part of the backup.
+Yes, as described under *Restore* above, if **Backup** is checked, WinSetView creates a backup every run that can be restored at any time. You can also revert the Explorer views to Windows defaults at any time. However, be sure to check the **Explorer Options** screen and set those options as desired, as only some of those settings are captured in the backup.
 
 ### Can I disable automatic folder type discovery and keep special folder types, such as Pictures?
 
-Yes, but it's not convenient and currently is only practical on Windows 10 ([or Windows 11 patched to use the Windows 10 Explorer](https://lesferch.github.io/OldExplorer/)) because the option **Also apply this template to all subfolders** is broken in the Windows 11 Explorer.
+Yes, but it's not convenient and currently is only practical on Windows 10 (or Windows 11 configured to use the Windows 10 Explorer) because the option **Also apply this template to all subfolders** is broken in the Windows 11 Explorer.
 
 Here are the steps:
 
